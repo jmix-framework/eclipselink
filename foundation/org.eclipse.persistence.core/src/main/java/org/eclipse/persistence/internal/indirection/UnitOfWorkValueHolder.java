@@ -14,10 +14,13 @@
 //     Oracle - initial API and implementation from Oracle TopLink
 package org.eclipse.persistence.internal.indirection;
 
+import java.rmi.server.ObjID;
+
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.exceptions.ValidationException;
 import org.eclipse.persistence.indirection.ValueHolderInterface;
 import org.eclipse.persistence.indirection.WeavedAttributeValueHolderInterface;
+import org.eclipse.persistence.internal.localization.ExceptionLocalization;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.internal.sessions.UnitOfWorkImpl;
 import org.eclipse.persistence.internal.sessions.remote.RemoteValueHolder;
@@ -330,4 +333,11 @@ public abstract class UnitOfWorkValueHolder<T> extends DatabaseValueHolder<T> im
         return ((WeavedAttributeValueHolderInterface)this.wrappedValueHolder).shouldAllowInstantiationDeferral();
     }
 
+    // jmix begin
+    protected void throwUnfetchedAttributeException() {
+        throw new IllegalStateException(
+                ExceptionLocalization.buildMessage("cannot_get_unfetched_attribute",
+                        new Object[]{relationshipSourceObject, sourceAttributeName}));
+    }
+    // jmix end
 }
