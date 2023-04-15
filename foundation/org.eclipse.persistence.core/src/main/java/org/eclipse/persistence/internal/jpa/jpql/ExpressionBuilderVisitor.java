@@ -2580,7 +2580,7 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
                         localExpression = localExpression.getAllowingNull(path);
                     }
                     // jmix start
-                    else if (!last && foreignReferenceMapping && nullAllowedInSortBy) {
+                    else if (foreignReferenceMapping && nullAllowedInSortBy) {
                         localExpression = localExpression.getAllowingNull(path);
                     }
                     // jmix end
