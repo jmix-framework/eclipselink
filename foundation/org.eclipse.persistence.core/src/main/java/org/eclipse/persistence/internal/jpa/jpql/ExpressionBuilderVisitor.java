@@ -196,6 +196,13 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
      */
     private boolean nullAllowed;
 
+    // jmix start
+    /**
+     * Determines whether the target relationship is allowed to be <code>null</code> in sort by condition.
+     */
+    private boolean nullAllowedInSortBy;
+    // jmix end
+
     /**
      * This {@link Comparator} compares two {@link Class} values and returned the appropriate numeric
      * type that takes precedence.
@@ -1811,7 +1818,15 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
     public void visit(OrderByItem expression) {
 
         // Create the item
-        expression.getExpression().accept(this);
+        // jmix start
+        try {
+            nullAllowedInSortBy = true;
+            expression.getExpression().accept(this);
+        } finally {
+            nullAllowedInSortBy = false;
+        }
+        // jmix end
+
 
         // Create the ordering item
         switch (expression.getOrdering()) {
@@ -2254,6 +2269,7 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
         resolver.checkMappingType = false;
         resolver.localExpression  = null;
         resolver.descriptor       = null;
+        resolver.nullAllowedInSortBy = nullAllowedInSortBy; // jmix
 
         expression.accept(resolver);
 
@@ -2559,6 +2575,14 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
          */
         boolean nullAllowed;
 
+        // jmix start
+        /**
+         * Determines whether the target relationship is allowed to be <code>null</code> in sort by condition.
+         */
+        boolean nullAllowedInSortBy;
+        // jmix end
+
+
         /**
          * Resolves a database column.
          *
@@ -2608,6 +2632,9 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
                 DatabaseMapping mapping = descriptor.getObjectBuilder().getMappingForAttributeName(path);
                 boolean last = (index + 1 == count);
                 boolean collectionMapping = false;
+                // jmix start
+                boolean foreignReferenceMapping = false;
+                // jmix end
 
                 // The path is a mapping
                 if (mapping != null) {
@@ -2619,6 +2646,10 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
 
                     // This will tell us how to create the Expression
                     collectionMapping = mapping.isCollectionMapping();
+                    // jmix start
+                    foreignReferenceMapping = mapping.isForeignReferenceMapping();
+                    // jmix end
+
 
                     // Retrieve the reference descriptor so we can continue traversing the path
                     if (!last) {
@@ -2641,6 +2672,9 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
 
                         // This will tell us how to create the Expression
                         collectionMapping = queryKey.isCollectionQueryKey();
+                        // jmix start
+                        foreignReferenceMapping = queryKey.isForeignReferenceQueryKey();
+                        // jmix end
 
                         // Retrieve the reference descriptor so we can continue traversing the path
                         if (!last && queryKey.isForeignReferenceQueryKey()) {
@@ -2667,6 +2701,11 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
                     if (last && nullAllowed) {
                         localExpression = localExpression.getAllowingNull(path);
                     }
+                    // jmix start
+                    else if (!last && foreignReferenceMapping && nullAllowedInSortBy) {
+                        localExpression = localExpression.getAllowingNull(path);
+                    }
+                    // jmix end
                     else {
                         localExpression = localExpression.get(path);
                     }
