@@ -201,6 +201,11 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
      * Determines whether the target relationship is allowed to be <code>null</code> in sort by condition.
      */
     private boolean nullAllowedInSortBy;
+
+    /**
+     * Determines whether the target expression 'is null' expression
+     */
+    boolean isNullExpression;
     // jmix end
 
     /**
@@ -1735,21 +1740,31 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
 
     @Override
     public void visit(NullComparisonExpression expression) {
-
-        // Create the expression first
-        expression.getExpression().accept(this);
-
-        // Mark it as NOT NULL
-        if (expression.hasNot()) {
-            queryExpression = queryExpression.notNull();
+        // jmix begin
+        if (!expression.hasNot()) {
+            isNullExpression = true;
         }
-        // Mark it as IS NULL
-        else {
-            queryExpression = queryExpression.isNull();
-        }
+        // jmix end
+        try {
 
-        // Set the expression type
-        type[0] = Boolean.class;
+            // Create the expression first
+            expression.getExpression().accept(this);
+
+            // Mark it as NOT NULL
+            if (expression.hasNot()) {
+                queryExpression = queryExpression.notNull();
+            }
+            // Mark it as IS NULL
+            else {
+                queryExpression = queryExpression.isNull();
+            }
+
+            // Set the expression type
+            type[0] = Boolean.class;
+
+        } finally {// jmix begin
+            isNullExpression = false;
+        }// jmix end
     }
 
     @Override
@@ -2270,6 +2285,7 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
         resolver.localExpression  = null;
         resolver.descriptor       = null;
         resolver.nullAllowedInSortBy = nullAllowedInSortBy; // jmix
+        resolver.isNullExpression = isNullExpression; // jmix
 
         expression.accept(resolver);
 
@@ -2580,6 +2596,11 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
          * Determines whether the target relationship is allowed to be <code>null</code> in sort by condition.
          */
         boolean nullAllowedInSortBy;
+
+        /**
+         * Determines whether the target expression 'is null' expression
+         */
+        boolean isNullExpression;
         // jmix end
 
 
@@ -2703,6 +2724,8 @@ final class ExpressionBuilderVisitor extends JPQLFunctionsAbstractBuilder implem
                     }
                     // jmix start
                     else if (foreignReferenceMapping && nullAllowedInSortBy) {
+                        localExpression = localExpression.getAllowingNull(path);
+                    } else if (last && foreignReferenceMapping && isNullExpression) {
                         localExpression = localExpression.getAllowingNull(path);
                     }
                     // jmix end
