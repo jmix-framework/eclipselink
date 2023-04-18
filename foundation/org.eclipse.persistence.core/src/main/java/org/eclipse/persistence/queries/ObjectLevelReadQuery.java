@@ -1800,6 +1800,9 @@ public abstract class ObjectLevelReadQuery extends ObjectBuildingQuery {
                         fetchedFields.addAll(mappingInAggregate.getFields());
                     }
                 }
+                else {
+                    fetchedFields.addAll(mapping.getFields());
+                }
             } else {
                 fetchedFields.addAll(mapping.getFields());
             }
