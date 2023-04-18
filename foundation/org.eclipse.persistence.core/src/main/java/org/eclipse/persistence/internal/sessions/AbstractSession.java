@@ -120,7 +120,7 @@ import org.eclipse.persistence.sessions.coordination.CommandManager;
 import org.eclipse.persistence.sessions.coordination.CommandProcessor;
 import org.eclipse.persistence.sessions.coordination.MetadataRefreshListener;
 import org.eclipse.persistence.sessions.serializers.Serializer;
-import org.eclipse.persistence.cuba.CubaUtil;
+import org.eclipse.persistence.internal.helper.CubaUtil;
 
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -1287,7 +1287,7 @@ public abstract class AbstractSession extends CoreAbstractSession<ClassDescripto
         public void checkAndRefreshInvalidObject(Object object, CacheKey cacheKey, ClassDescriptor descriptor) {
             if (isConsideredInvalid(object, cacheKey, descriptor)) {
                 // jmix begin: always load refreshed object
-                Object prop = CubaUtil.beginDisableSoftDelete(this);
+                Boolean prevSoftDeletion = CubaUtil.setSoftDeletion(false);
                 try {
                 // jmix end
                     ReadObjectQuery query = new ReadObjectQuery();
@@ -1298,7 +1298,7 @@ public abstract class AbstractSession extends CoreAbstractSession<ClassDescripto
                     this.executeQuery(query);
                 // jmix begin
                 } finally {
-                    CubaUtil.endDisableSoftDelete(this, prop);
+                    CubaUtil.setSoftDeletion(prevSoftDeletion);
                 }
                 // jmix end
             }
