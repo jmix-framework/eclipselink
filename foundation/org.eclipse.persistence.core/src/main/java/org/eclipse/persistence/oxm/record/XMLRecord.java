@@ -76,6 +76,12 @@ public abstract class XMLRecord extends AbstractRecord implements AbstractMarsha
         return get(new XMLField(key));
     }
 
+    // jmix begin
+    public Object get(DatabaseField key, boolean lookupField) {
+        return get(key);
+    }
+    // jmix end
+
     /**
      * PUBLIC:
      * Add the field-value pair to the row.
