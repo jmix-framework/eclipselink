@@ -750,7 +750,9 @@ public abstract class AggregateMapping extends DatabaseMapping {
                     targetFetchGroup.onUnfetchedAttribute((FetchGroupTracker)target, null);
                 }
             } else if (originalWasNull && sourceFetchGroup != null){
-                    this.descriptor.getFetchGroupManager().setObjectFetchGroup(target, sourceFetchGroup, targetSession);
+                // jmix begin
+                setTargetFetchGroupIfNull(target, sourceFetchGroup, targetSession);
+                // jmix end
             }
         }
 
@@ -1134,4 +1136,11 @@ public abstract class AggregateMapping extends DatabaseMapping {
         }
         return true;
     }
+
+    // jmix begin
+    protected void setTargetFetchGroupIfNull(Object target, FetchGroup sourceFetchGroup, AbstractSession targetSession) {
+        this.descriptor.getFetchGroupManager().setObjectFetchGroup(target, sourceFetchGroup, targetSession);
+    }
+    // jmix end
+
 }
