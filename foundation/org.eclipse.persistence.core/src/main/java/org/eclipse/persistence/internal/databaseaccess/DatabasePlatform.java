@@ -3175,6 +3175,18 @@ public class DatabasePlatform extends DatasourcePlatform implements DDLPlatform 
         }
     }
 
+    // jmix begin
+    public HintPosition getHintPosition() {
+        return HintPosition.INSIDE_QUERY;
+    }
+
+    public enum HintPosition {
+        INSIDE_QUERY,
+        BEFORE_QUERY,
+        AFTER_QUERY
+    }
+    // jmix end
+
     @Override
     public FieldDefinition.DatabaseType getDatabaseType(String typeName) {
         final Class<?> typeFromName = getJavaTypes().get(typeName);
