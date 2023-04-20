@@ -1137,4 +1137,11 @@ public class SQLServerPlatform extends DatabasePlatform {
         super.setParameterValueInDatabaseCall(parameter, statement, name, session);
     }
 
+    // jmix begin
+    @Override
+    public HintPosition getHintPosition() {
+        return HintPosition.AFTER_QUERY;
+    }
+    // jmix end
+
 }
