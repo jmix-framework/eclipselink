@@ -33,7 +33,8 @@ public class TransientCompatibleAnnotations {
             "jakarta.persistence.PersistenceUnits",
             "jakarta.persistence.PersistenceContext",
             "jakarta.persistence.PersistenceContexts",
-            "jakarta.persistence.Transient"
+            "jakarta.persistence.Transient",
+            "jakarta.persistence.Temporal"
     );
 
     /**
