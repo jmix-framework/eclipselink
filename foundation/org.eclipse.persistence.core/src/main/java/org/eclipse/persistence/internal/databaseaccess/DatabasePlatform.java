@@ -1864,7 +1864,7 @@ public class DatabasePlatform extends DatasourcePlatform implements DDLPlatform 
      *
      */
     public boolean shouldPrintInheritanceTableJoinsInFromClause() {
-        return printInheritanceTableJoinsInFromClause;
+        return Boolean.TRUE.equals(printInheritanceTableJoinsInFromClause);
     }
     // jmix end
 
