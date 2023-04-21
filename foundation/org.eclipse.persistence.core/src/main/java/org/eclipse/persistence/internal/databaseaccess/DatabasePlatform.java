@@ -190,6 +190,11 @@ public class DatabasePlatform extends DatasourcePlatform implements DDLPlatform 
     /** Allow configuration option to use Where clause joining or From clause joining. **/
     protected Boolean printInnerJoinInWhereClause;
 
+    // jmix begin
+    /** **/
+    protected Boolean printInheritanceTableJoinsInFromClause;
+    // jmix end
+
     /** Allow for the code that is used for preparing cursored outs for a storedprocedure to be settable. **/
     protected int cursorCode;
 
@@ -1511,6 +1516,20 @@ public class DatabasePlatform extends DatasourcePlatform implements DDLPlatform 
         this.printInnerJoinInWhereClause = printInnerJoinInWhereClause;
     }
 
+    // jmix begin
+    /**
+     * Changes the mechanism to print joins for the inherited tables. If true joins will be printed in the FROM
+     * clause using {@link org.eclipse.persistence.internal.expressions.OuterJoinExpressionHolder}. Only works for
+     * straight cases like this queue: select d from df$Doc d. This means that this parameter isn't used in the batch loading fields
+     * for the fetch plan for example.
+     *
+     */
+    public void setPrintInheritanceTableJoinsInFromClause(boolean printInheritanceTableJoinsInFromClause) {
+        this.printInheritanceTableJoinsInFromClause = printInheritanceTableJoinsInFromClause;
+    }
+    // jmix end
+
+
     public void setUsesStringBinding(boolean aBool) {
         usesStringBinding = aBool;
     }
@@ -1624,6 +1643,19 @@ public class DatabasePlatform extends DatasourcePlatform implements DDLPlatform 
             return this.printInnerJoinInWhereClause;
         }
     }
+
+    // jmix begin
+    /**
+     * If we need to print joins for the inherited tables. If true joins will be printed in the FROM
+     * clause using {@link org.eclipse.persistence.internal.expressions.OuterJoinExpressionHolder}. Only works for
+     * straight cases like this queue: select d from df$Doc d. This means that this parameter isn't used in the batch loading fields
+     * for the fetch plan for example.
+     *
+     */
+    public boolean shouldPrintInheritanceTableJoinsInFromClause() {
+        return printInheritanceTableJoinsInFromClause;
+    }
+    // jmix end
 
     /**
      * INTERNAL:
