@@ -21,6 +21,7 @@ import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.exceptions.QueryException;
 import org.eclipse.persistence.expressions.Expression;
 import org.eclipse.persistence.expressions.ExpressionBuilder;
+import org.eclipse.persistence.internal.helper.CubaUtil;
 import org.eclipse.persistence.internal.helper.DatabaseField;
 import org.eclipse.persistence.internal.queries.ContainerPolicy;
 import org.eclipse.persistence.internal.sessions.AbstractRecord;
@@ -303,6 +304,13 @@ public class ParameterExpression extends BaseExpression {
                     } else {
                         value = session.getProperty(this.field.getName());
                     }
+
+                    // jmix begin
+                    if (value == null) {
+                        value = CubaUtil.getProperty(this.field.getName());
+                    }
+                    // jmix end
+
 
                     if (value == null) {
                         throw QueryException.missingContextPropertyForPropertyParameterExpression(query, this.field.getName());
