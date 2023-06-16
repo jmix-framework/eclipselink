@@ -22,12 +22,12 @@
     <groupId>org.eclipse.persistence</groupId>
     <artifactId>org.eclipse.persistence.core</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.2-SNAPSHOT</version>
+    <version>4.0.3-SNAPSHOT</version>
 
     <parent>
         <groupId>org.eclipse.persistence</groupId>
         <artifactId>org.eclipse.persistence.parent</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
