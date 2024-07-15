@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2021 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2024 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -29,6 +29,9 @@ import org.eclipse.persistence.internal.sessions.AbstractRecord;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.internal.sessions.UnitOfWorkImpl;
 import org.eclipse.persistence.sessions.UnitOfWork;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * DatabaseValueHolder wraps a database-stored object and implements
@@ -60,6 +63,8 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
      * Set internally in EclipseLink when the state of coordination between a weaved valueholder and the underlying property is known
      */
     protected boolean isCoordinatedWithProperty = false;
+
+    private final Lock instanceLock  = new ReentrantLock();
 
     /**
      * Default constructor.
@@ -101,7 +106,8 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
     public T getValue() {
         boolean instantiated = this.isInstantiated;
         if (!instantiated) {
-            synchronized (this) {
+            instanceLock.lock();
+            try {
                 instantiated = this.isInstantiated;
                 if (!instantiated) {
                     // jmix begin: We have added the following code to prevent fetch of lazy fields
@@ -136,6 +142,8 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
                     postInstantiate();
                     resetFields();
                 }
+            } finally {
+                instanceLock.unlock();
             }
         }
         return value;
