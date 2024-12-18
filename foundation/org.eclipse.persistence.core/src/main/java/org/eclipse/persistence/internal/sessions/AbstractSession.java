@@ -2815,7 +2815,8 @@ public abstract class AbstractSession extends CoreAbstractSession<ClassDescripto
                cacheKey.acquireDeferredLock();
                original = cacheKey.getObject();
                if (original == null) {
-                   synchronized (cacheKey) {
+                   cacheKey.getInstanceLock().lock();
+                   try {
                        if (cacheKey.isAcquired()) {
                            try {
                                cacheKey.wait();
@@ -2824,6 +2825,8 @@ public abstract class AbstractSession extends CoreAbstractSession<ClassDescripto
                            }
                        }
                        original = cacheKey.getObject();
+                   } finally {
+                       cacheKey.getInstanceLock().unlock();
                    }
                }
                cacheKey.releaseDeferredLock();
