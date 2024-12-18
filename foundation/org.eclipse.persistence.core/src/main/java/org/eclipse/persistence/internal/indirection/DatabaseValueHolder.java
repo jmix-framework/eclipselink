@@ -64,7 +64,7 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
      */
     protected boolean isCoordinatedWithProperty = false;
 
-    private final Lock instanceLock  = new ReentrantLock();
+    private Lock instanceLock  = new ReentrantLock();
 
     /**
      * Default constructor.
@@ -75,7 +75,16 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
     @Override
     public Object clone() {
         try {
-            return super.clone();
+            //Keep origin pointer to lock in local variable as instance variable is updated inside
+            Lock lock = instanceLock;
+            lock.lock();
+            try {
+                DatabaseValueHolder<T> result = (DatabaseValueHolder<T>)super.clone();
+                result.instanceLock = new ReentrantLock();
+                return result;
+            } finally {
+                lock.unlock();
+            }
         } catch (CloneNotSupportedException exception) {
             throw new InternalError();
         }
@@ -382,6 +391,10 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
         } else {
             return "{" + Helper.getShortClassName(getClass()) + ": " + ToStringLocalization.buildMessage("not_instantiated", null) + "}";
         }
+    }
+
+    Lock getInstanceLock() {
+        return this.instanceLock;
     }
 
     // jmix begin
