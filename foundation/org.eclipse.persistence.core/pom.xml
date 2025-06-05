@@ -22,7 +22,7 @@
     <groupId>org.eclipse.persistence</groupId>
     <artifactId>org.eclipse.persistence.core</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.5-SNAPSHOT</version>
+    <version>4.0.6-SNAPSHOT</version>
 
     <parent>
         <groupId>org.eclipse.persistence</groupId>
@@ -607,7 +607,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <!--jmix begin-->
             <!--Use ${project.parent.version}, not jmix fork version-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -661,8 +661,21 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-javadoc-resources</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.persistence</groupId>
+                                    <artifactId>org.eclipse.persistence.parent</artifactId>
+                                    <version>${project.parent.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
+            <!--jmix end-->
         </plugins>
     </build>
 
