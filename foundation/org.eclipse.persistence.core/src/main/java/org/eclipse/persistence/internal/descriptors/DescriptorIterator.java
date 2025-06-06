@@ -281,8 +281,14 @@ public abstract class DescriptorIterator {
         //Extended condition to allow to detach entities in the lazy loaded collections but without instantiation
         //and basic check to avoid StackOverflowError in cyclic detach
         if (shouldIterateOverUninstantiatedIndirectionObjects() ||
-            (shouldIterateOverIndirectionObjects() && container.isInstantiated()) ||
-            (isForDetach() && !getVisitedMappings().containsKey(mapping.hashCode() + container.hashCode()) && getVisitedMappings().size() < 100)) {
+            (shouldIterateOverIndirectionObjects() && container.isInstantiated())
+            // jmix begin: lazy attributes should not be fetched on detach even if CascadeType.DETACH is present.
+            // Detach occurs after each loading by DataManager which breaks lazy loading for references with CascadeType.ALL or DETACH.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=541873 is almost always avoided by manual detaching by FetchPlan after loading
+            /*||
+            (isForDetach() && !getVisitedMappings().containsKey(mapping.hashCode() + container.hashCode()) && getVisitedMappings().size() < 100)*/
+            // jmix end
+        ) {
             // force instantiation only if specified
             if (isForDetach()) {
                 getVisitedMappings().put(mapping.hashCode() + container.hashCode(), mapping);
