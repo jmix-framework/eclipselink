@@ -20,7 +20,7 @@ echo "    Installing org.eclipse.persistence:org.eclipse.persistence.core:${FORK
 echo "============================================================================================================"
 cd foundation/org.eclipse.persistence.core
 mvn versions:set -DnewVersion="${FORK_VERSION}"
-mvn install -f pom.xml
+mvn install -f pom.xml -DskipSBOM
 
 cd ../..
 
@@ -29,7 +29,7 @@ echo "    Installing org.eclipse.persistence:org.eclipse.persistence.jpa:${FORK_
 echo "============================================================================================================"
 cd jpa/org.eclipse.persistence.jpa
 mvn versions:set -DnewVersion="${FORK_VERSION}"
-mvn install -f pom.xml
+mvn install -f pom.xml -DskipSBOM
 
 cd ../..
 
