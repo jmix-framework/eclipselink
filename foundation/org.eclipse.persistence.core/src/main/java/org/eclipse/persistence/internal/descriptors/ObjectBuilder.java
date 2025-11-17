@@ -2172,9 +2172,15 @@ public class ObjectBuilder extends CoreObjectBuilder<AbstractRecord, AbstractSes
         List<DatabaseMapping> mappings = this.descriptor.getMappings();
         int size = mappings.size();
         FetchGroup executionFetchGroup = query.getExecutionFetchGroup(this.descriptor);
+        Class<?> queryClass = query.getDescriptor().getJavaClass(); // jmix
         for (int index = 0; index < size; index++) {
             DatabaseMapping mapping = mappings.get(index);
-            if (readAllMappings || query.shouldReadMapping(mapping, executionFetchGroup)) {
+            Class<?> mappingClass = mapping.getDescriptor().getJavaClass(); // jmix
+            if (readAllMappings || query.shouldReadMapping(mapping, executionFetchGroup)
+                    // The inheritor's fields are absent from the FetchGroup when querying by ancestor class.
+                    // Including them helps prevent issues with special NotInstantiated-collections.
+                    || (mapping.isCollectionMapping() && queryClass != mappingClass && queryClass.isAssignableFrom(mappingClass)) // jmix
+            ) {
                 mapping.buildCloneFromRow(databaseRow, joinManager, clone, sharedCacheKey, query, unitOfWork, unitOfWork, !readAllMappings);// jmix
             }
         }
