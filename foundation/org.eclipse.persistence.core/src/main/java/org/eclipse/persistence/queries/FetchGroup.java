@@ -19,7 +19,7 @@ import org.eclipse.persistence.core.queries.CoreAttributeGroup;
 import org.eclipse.persistence.descriptors.DescriptorCustomizer;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.FetchGroupManager;
-import org.eclipse.persistence.internal.helper.CubaUtil;
+import org.eclipse.persistence.internal.helper.JmixUtil;
 import org.eclipse.persistence.internal.localization.ExceptionLocalization;
 import org.eclipse.persistence.internal.queries.AttributeItem;
 import org.eclipse.persistence.internal.queries.EntityFetchGroup;
@@ -188,12 +188,12 @@ public class FetchGroup extends AttributeGroup {
         // jmix begin
         ClassDescriptor.DeletePredicate deletePredicate = session.getClassDescriptor(entity).getDeletePredicate();
         boolean isDeleted = deletePredicate != null && deletePredicate.isDeleted(entity);
-        if (isDeleted && CubaUtil.isSoftDeletion()) {
-            Boolean prevSoftDeletion = org.eclipse.persistence.internal.helper.CubaUtil.setSoftDeletion(false);
+        if (isDeleted && JmixUtil.isSoftDeletion()) {
+            Boolean prevSoftDeletion = JmixUtil.setSoftDeletion(false);
             try {
                 result = session.executeQuery(query);
             } finally {
-                org.eclipse.persistence.internal.helper.CubaUtil.setSoftDeletion(prevSoftDeletion);
+                JmixUtil.setSoftDeletion(prevSoftDeletion);
             }
         } else {
             result = session.executeQuery(query);

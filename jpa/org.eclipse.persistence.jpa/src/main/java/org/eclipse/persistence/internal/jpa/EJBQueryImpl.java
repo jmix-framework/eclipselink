@@ -49,6 +49,7 @@ import org.eclipse.persistence.expressions.Expression;
 import org.eclipse.persistence.internal.core.helper.CoreClassConstants;
 import org.eclipse.persistence.internal.databaseaccess.DatasourcePlatform;
 import org.eclipse.persistence.internal.helper.Helper;
+import org.eclipse.persistence.internal.helper.JmixUtil;
 import org.eclipse.persistence.internal.jpa.querydef.ParameterExpressionImpl;
 import org.eclipse.persistence.internal.localization.ExceptionLocalization;
 import org.eclipse.persistence.internal.queries.ContainerPolicy;
@@ -184,8 +185,8 @@ public class EJBQueryImpl<X> extends QueryImpl implements JpaQuery<X> {
         // PERF: Check if the JPQL has already been parsed.
         // Only allow queries with default properties to be parse cached.
         boolean isCacheable = (queryName == null) && (hints == null)
-                && org.eclipse.persistence.internal.helper.CubaUtil.isSoftDeletion() // jmix: do not cache queries when soft delete is disabled
-                && org.eclipse.persistence.internal.helper.CubaUtil.isEnabledJPQLParseCache(); // cuba: do not cache queries in some cases
+                && JmixUtil.isSoftDeletion() // jmix: do not cache queries when soft delete is disabled
+                && JmixUtil.isEnabledJPQLParseCache(); // cuba: do not cache queries in some cases
         DatabaseQuery databaseQuery = null;
         if (isCacheable) {
             databaseQuery = session.getProject().getJPQLParseCache().get(jpqlQuery);

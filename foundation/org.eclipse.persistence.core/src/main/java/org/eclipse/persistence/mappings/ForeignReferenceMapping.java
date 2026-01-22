@@ -46,6 +46,7 @@ import org.eclipse.persistence.internal.helper.ClassConstants;
 import org.eclipse.persistence.internal.helper.DatabaseField;
 import org.eclipse.persistence.internal.helper.Helper;
 import org.eclipse.persistence.internal.helper.NonSynchronizedSubVector;
+import org.eclipse.persistence.internal.helper.JmixUtil;
 import org.eclipse.persistence.internal.identitymaps.CacheId;
 import org.eclipse.persistence.internal.identitymaps.CacheKey;
 import org.eclipse.persistence.internal.indirection.BasicIndirectionPolicy;
@@ -2264,7 +2265,7 @@ public abstract class ForeignReferenceMapping extends DatabaseMapping {
         }
 
         // jmix begin
-        if (!org.eclipse.persistence.internal.helper.CubaUtil.isSoftDeletion()) {
+        if (!JmixUtil.isSoftDeletion()) {
             if (targetQuery == this.selectionQuery) {
                 targetQuery = (ObjectLevelReadQuery)targetQuery.clone();
                 targetQuery.setIsExecutionClone(true);

@@ -22,7 +22,7 @@ import org.eclipse.persistence.internal.localization.ToStringLocalization;
 import org.eclipse.persistence.internal.sessions.AbstractRecord;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.internal.sessions.UnitOfWorkImpl;
-import org.eclipse.persistence.internal.helper.CubaUtil;
+import org.eclipse.persistence.internal.helper.JmixUtil;
 import org.eclipse.persistence.sessions.UnitOfWork;
 
 import java.io.Serializable;
@@ -112,9 +112,9 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
 
                     // Store client session parameters into TL variable in order to not lose tenantId
                     // when L2 (persistence unit) entity cache used. Nested value holder has no access to client session in such case.
-                    if (!CubaUtil.hasProperties()) {
+                    if (!JmixUtil.hasProperties()) {
                         Map<String, Object> properties = findClientSessionProperties();
-                        CubaUtil.setProperties(properties);
+                        JmixUtil.setProperties(properties);
                         try {
                             // jmix end
 
@@ -123,7 +123,7 @@ public abstract class DatabaseValueHolder<T> implements WeavedAttributeValueHold
 
                             // jmix begin
                         } finally {
-                            CubaUtil.clearProperties();
+                            JmixUtil.clearProperties();
                         }
                     } else {
                         // The value must be set directly because the setValue can also cause instantiation under UOW.
