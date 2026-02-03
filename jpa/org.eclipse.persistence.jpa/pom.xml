@@ -22,6 +22,7 @@
     <name>EclipseLink JPA</name>
     <artifactId>org.eclipse.persistence.jpa</artifactId>
     <packaging>jar</packaging>
+    <version>5.0.0-SNAPSHOT</version>
 
     <parent>
         <groupId>org.eclipse.persistence</groupId>
@@ -35,22 +36,26 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.core</artifactId>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.moxy</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.json</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa.jpql</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <!--API dependecies-->
         <dependency>
@@ -184,6 +189,75 @@
                     <additionalOptions>--add-reads org.eclipse.persistence.jpa=ALL-UNNAMED</additionalOptions>
                 </configuration>
             </plugin>
+            <!--jmix begin-->
+            <!--Use ${project.parent.version}, not jmix fork version-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-legal-resource</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>org.eclipse.persistence.project</artifactId>
+                                    <version>${project.parent.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>org.eclipse.persistence.project</artifactId>
+                                    <version>${project.parent.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-spotbugs-filter</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>org.eclipse.persistence.project</artifactId>
+                                    <version>${project.parent.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-test-report-properties</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>org.eclipse.persistence.project</artifactId>
+                                    <version>${project.parent.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-javadoc-resources</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.persistence</groupId>
+                                    <artifactId>org.eclipse.persistence.project</artifactId>
+                                    <version>${project.parent.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--jmix end-->
         </plugins>
     </build>
 </project>
