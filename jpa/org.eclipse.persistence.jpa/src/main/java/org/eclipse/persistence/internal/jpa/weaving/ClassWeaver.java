@@ -96,8 +96,7 @@ public class ClassWeaver extends ClassVisitor {
     public static final String JPA_TRANSIENT_DESCRIPTION = "Ljakarta/persistence/Transient;";
     public static final String XML_TRANSIENT_DESCRIPTION = "Ljakarta/xml/bind/annotation/XmlTransient;";
 
-    // Jakarta Persistence API
-    public static final String JPA_ENTITY_NOT_FOUND_EXCEPTION_SHORT_SIGNATURE = "jakarta/persistence/EntityNotFoundException";
+    public static final String ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE = "java/lang/IllegalStateException";//jmix
 
     public static final String PERSISTENCE_SET = Helper.PERSISTENCE_SET;
     public static final String PERSISTENCE_GET = Helper.PERSISTENCE_GET;
@@ -1233,11 +1232,11 @@ public class ClassWeaver extends ClassVisitor {
             cv_checkFetched.visitVarInsn(Opcodes.ASTORE, 2);
             cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 2);
             cv_checkFetched.visitJumpInsn(Opcodes.IFNULL, l1);
-            // throw new EntityNotFoundException(errorMsg);
-            cv_checkFetched.visitTypeInsn(Opcodes.NEW, JPA_ENTITY_NOT_FOUND_EXCEPTION_SHORT_SIGNATURE);
+            // jmix: throw new IllegalStateException(errorMsg);
+            cv_checkFetched.visitTypeInsn(Opcodes.NEW, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE);// jmix
             cv_checkFetched.visitInsn(Opcodes.DUP);
             cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 2);
-            cv_checkFetched.visitMethodInsn(Opcodes.INVOKESPECIAL, JPA_ENTITY_NOT_FOUND_EXCEPTION_SHORT_SIGNATURE, "<init>", "(" + STRING_SIGNATURE + ")V", false);
+            cv_checkFetched.visitMethodInsn(Opcodes.INVOKESPECIAL, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE, "<init>", "(" + STRING_SIGNATURE + ")V", false);// jmix
             cv_checkFetched.visitInsn(Opcodes.ATHROW);
             cv_checkFetched.visitLabel(l1);
             cv_checkFetched.visitFrame(Opcodes.F_APPEND, 1, new Object[]{"java/lang/String"}, 0, null);
@@ -1265,11 +1264,11 @@ public class ClassWeaver extends ClassVisitor {
             cv_checkFetchedForSet.visitVarInsn(Opcodes.ASTORE, 2);
             cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 2);
             cv_checkFetchedForSet.visitJumpInsn(Opcodes.IFNULL, l1);
-            // throw new EntityNotFoundException(errorMsg);
-            cv_checkFetchedForSet.visitTypeInsn(Opcodes.NEW, JPA_ENTITY_NOT_FOUND_EXCEPTION_SHORT_SIGNATURE);
+            // jmix: throw new IllegalStateException(errorMsg);
+            cv_checkFetchedForSet.visitTypeInsn(Opcodes.NEW, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE);// jmix
             cv_checkFetchedForSet.visitInsn(Opcodes.DUP);
             cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 2);
-            cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKESPECIAL, JPA_ENTITY_NOT_FOUND_EXCEPTION_SHORT_SIGNATURE, "<init>", "(" + STRING_SIGNATURE + ")V", false);
+            cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKESPECIAL, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE, "<init>", "(" + STRING_SIGNATURE + ")V", false);// jmix
             cv_checkFetchedForSet.visitInsn(Opcodes.ATHROW);
             cv_checkFetchedForSet.visitLabel(l1);
             cv_checkFetchedForSet.visitFrame(Opcodes.F_APPEND, 1, new Object[]{"java/lang/String"}, 0, null);
