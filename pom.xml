@@ -143,6 +143,14 @@
         <wildfly.version>27.0.0.Final</wildfly.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Sonatype Nexus Releases</name>
+            <url>${jmixUploadUrl}</url>
+        </repository>
+    </distributionManagement>
+
     <!-- Default modules set and added to by all profiles -->
     <modules>
         <module>boms/parent</module>
