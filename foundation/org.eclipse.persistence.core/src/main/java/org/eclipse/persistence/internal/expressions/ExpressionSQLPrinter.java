@@ -104,6 +104,16 @@ public class ExpressionSQLPrinter {
         return call;
     }
 
+    // jmix begin: obtain call query to resolve context properties from query session
+    /**
+     * INTERNAL:
+     * Return the query associated with the current call.
+     */
+    protected DatabaseQuery getCallQuery() {
+        return call == null ? null : call.getQuery();
+    }
+    // jmix end
+
     /**
      * INTERNAL:
      * Return the database platform specific information.
