@@ -289,7 +289,7 @@ public class ParameterExpression extends BaseExpression {
             // returned if it is a property so check for null and isProperty
             if ((value == AbstractRecord.noEntry) || ((value == null) && this.isProperty)) {
                 if (this.isProperty) {
-                    if (query != null) {
+                    if (query != null && query.getSession() != null) { // jmix: added session null-check
                         value = query.getSession().getProperty(this.field.getName());
                     } else {
                         value = session.getProperty(this.field.getName());
@@ -381,7 +381,7 @@ public class ParameterExpression extends BaseExpression {
     @Override
     public void printSQL(ExpressionSQLPrinter printer) {
         if (printer.shouldPrintParameterValues()) {
-            Object value = getValue(printer.getTranslationRow(), printer.getSession());
+            Object value = getValue(printer.getTranslationRow(), printer.getCallQuery(), printer.getSession()); // jmix: resolve context properties from query session
             if (value instanceof Collection) {
                 printer.printValuelist((Collection<Object>)value, this.canBind);
             } else {

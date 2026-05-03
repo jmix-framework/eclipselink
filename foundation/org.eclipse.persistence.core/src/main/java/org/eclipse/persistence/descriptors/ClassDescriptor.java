@@ -881,7 +881,11 @@ public class ClassDescriptor extends CoreDescriptor<AttributeGroup, DescriptorEv
      * if the statement is not appropriate.
      */
     public DatasourceCall buildCallFromStatement(SQLStatement statement, DatabaseQuery query, AbstractSession session) {
-        DatabaseCall call = statement.buildCall(session);
+        // jmix begin: pass query context for select SQL printing
+        DatabaseCall call = statement instanceof SQLSelectStatement
+                ? ((SQLSelectStatement)statement).buildCall(session, query)
+                : statement.buildCall(session);
+        // jmix end
         if (isNativeConnectionRequired()) {
             call.setIsNativeConnectionRequired(true);
         }

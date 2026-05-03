@@ -458,7 +458,7 @@ public class RelationExpression extends CompoundExpression {
         } else if (this.secondChild.isConstantExpression() && (((ConstantExpression)this.secondChild).getValue() == null)) {
             return true;
         } else if (this.secondChild.isParameterExpression() && (printer.getTranslationRow() != null) &&
-            (((ParameterExpression)this.secondChild).getValue(printer.getTranslationRow(), printer.getSession()) == null)) {
+            (((ParameterExpression)this.secondChild).getValue(printer.getTranslationRow(), printer.getCallQuery(), printer.getSession()) == null)) { // jmix: resolve context properties from query session
             return true;
         } else {
             return false;
@@ -476,7 +476,7 @@ public class RelationExpression extends CompoundExpression {
         } else if (this.secondChild.isConstantExpression() && (((ConstantExpression)this.secondChild).getValue() == null)) {
             return true;
         } else if (this.secondChild.isParameterExpression() && (printer.getTranslationRow() != null) &&
-            (((ParameterExpression)this.secondChild).getValue(printer.getTranslationRow(), printer.getSession()) == null)) {
+            (((ParameterExpression)this.secondChild).getValue(printer.getTranslationRow(), printer.getCallQuery(), printer.getSession()) == null)) { // jmix: resolve context properties from query session
             return true;
         } else {
             return false;
