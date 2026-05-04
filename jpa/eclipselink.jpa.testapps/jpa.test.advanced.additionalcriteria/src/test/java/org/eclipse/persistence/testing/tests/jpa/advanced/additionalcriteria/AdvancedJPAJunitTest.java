@@ -37,6 +37,8 @@ package org.eclipse.persistence.testing.tests.jpa.advanced.additionalcriteria;
 import jakarta.persistence.EntityManager;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.persistence.config.HintValues;
+import org.eclipse.persistence.config.QueryHints;
 import org.eclipse.persistence.testing.framework.jpa.junit.JUnitTestCase;
 import org.eclipse.persistence.testing.models.jpa.advanced.additionalcriteria.Bolt;
 import org.eclipse.persistence.testing.models.jpa.advanced.additionalcriteria.Eater;
@@ -88,6 +90,7 @@ public class AdvancedJPAJunitTest extends JUnitTestCase {
         suite.addTest(new AdvancedJPAJunitTest("testComplexAdditionalCriteria"));
         suite.addTest(new AdvancedJPAJunitTest("testAdditionalCriteriaBetweenEntities"));
         suite.addTest(new AdvancedJPAJunitTest("testAdditionalCriteriaWithSubQuery"));
+        suite.addTest(new AdvancedJPAJunitTest("testAdditionalCriteriaWithSessionPropertyAndPrepareFalseOutsideTransaction"));
 
         return suite;
     }
@@ -408,6 +411,57 @@ public class AdvancedJPAJunitTest extends JUnitTestCase {
             }
 
             // Re-throw exception to ensure stacktrace appears in test result.
+            throw e;
+        } finally {
+            closeEntityManager(em);
+        }
+    }
+
+    public void testAdditionalCriteriaWithSessionPropertyAndPrepareFalseOutsideTransaction() {
+        String eaterName = "Glutton-" + System.nanoTime();
+        String eaterNamePattern = "%" + eaterName + "%";
+        Integer eaterId;
+
+        EntityManager em = createEntityManager();
+        try {
+            beginTransaction(em);
+            em.setProperty("EATER_NAME", eaterNamePattern);
+
+            Eater eater = new Eater();
+            eater.setName(eaterName);
+            em.persist(eater);
+            eaterId = eater.getId();
+
+            commitTransaction(em);
+        } catch (RuntimeException e) {
+            if (isTransactionActive(em)) {
+                rollbackTransaction(em);
+            }
+
+            throw e;
+        } finally {
+            closeEntityManager(em);
+        }
+
+        em = createEntityManager();
+        try {
+            em.setProperty("EATER_NAME", eaterNamePattern);
+
+            assertNotNull(em.find(Eater.class, eaterId));
+            em.clear();
+
+            List<?> eaters = em.createQuery("SELECT e FROM Eater e WHERE e.name = :name")
+                    .setParameter("name", eaterName)
+                    .setHint(QueryHints.PREPARE, HintValues.FALSE)
+                    .getResultList();
+
+            assertEquals("Incorrect number of eaters were returned [" + eaters.size() + "], expected [1]",
+                    1, eaters.size());
+        } catch (RuntimeException e) {
+            if (isTransactionActive(em)) {
+                rollbackTransaction(em);
+            }
+
             throw e;
         } finally {
             closeEntityManager(em);
