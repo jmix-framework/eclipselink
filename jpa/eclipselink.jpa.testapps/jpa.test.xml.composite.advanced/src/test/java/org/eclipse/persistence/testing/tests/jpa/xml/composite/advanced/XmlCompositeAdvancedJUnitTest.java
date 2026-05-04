@@ -1356,7 +1356,7 @@ public class XmlCompositeAdvancedJUnitTest extends JUnitTestCase {
         List<Employee> employeesRead = em.createQuery("SELECT OBJECT(e) FROM XMLEmployee e WHERE e.lastName = '"+lastName+"'", Employee.class).getResultList();
         // while em is open, cache ServerSession that will be used later for verification
         DatabaseSessionImpl session = getDatabaseSession();
-        closeEntityManager(em);
+//        closeEntityManager(em); // jmix lazy access
 
         // verify number persisted and read is the same
         if(employeesPersisted.size() != employeesRead.size()) {
@@ -1376,6 +1376,7 @@ public class XmlCompositeAdvancedJUnitTest extends JUnitTestCase {
                 }
             }
         }
+        closeEntityManager(em); // jmix after lazy checks
 
         // clean-up
         deleteEmployeesWithUnidirectionalMappings(lastName);

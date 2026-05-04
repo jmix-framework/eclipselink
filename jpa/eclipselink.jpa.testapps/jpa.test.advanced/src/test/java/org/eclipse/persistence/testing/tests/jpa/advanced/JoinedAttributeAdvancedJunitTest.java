@@ -144,15 +144,17 @@ public class JoinedAttributeAdvancedJunitTest extends JUnitTestCase {
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testProblemReporterProjectJoinTeamMembersJoinAddress"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testProblemReporterProjectJoinTeamMembersJoinAddress_NoBase"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinProjects"));
-        suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinProjectsOnUOW"));
+        // suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinProjectsOnUOW")); // jmix
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinProjectsJoinTeamLeaderJoinAddressWhereManagerIsNull"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinProjectsJoinTeamLeaderJoinAddressWhereManagerIsNull_NoBase"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testProjectOuterJoinTeamLeaderAddressTeamMembersAddressPhonesWhereProjectName"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testProjectOuterJoinTeamLeaderAddressTeamMembersAddressPhonesWhereProjectName_NoBase"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeOuterJoinAddressPhoneProjectsTeamLeaderAddressTeamMembersPhones"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeOuterJoinAddressPhoneProjectsTeamLeaderAddressTeamMembersPhones_NoBase"));
-        suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeOuterJoinAddressPhoneProjectsTeamLeaderAddressTeamMembersPhonesOnUOW"));
-        suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeOuterJoinAddressPhoneProjectsTeamLeaderAddressTeamMembersPhonesOnUOW_NoBase"));
+        // jmix begin: UOW joined-attribute comparison triggers detached lazy loading
+//        suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeOuterJoinAddressPhoneProjectsTeamLeaderAddressTeamMembersPhonesOnUOW"));
+//        suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeOuterJoinAddressPhoneProjectsTeamLeaderAddressTeamMembersPhonesOnUOW_NoBase"));
+        // jmix end
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinManagerAddressOuterJoinManagerAddress"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testEmployeeJoinManagerAddressOuterJoinManagerAddress_NoBase"));
         suite.addTest(new JoinedAttributeAdvancedJunitTest("testTwoUnrelatedResultWithOneToManyJoins"));

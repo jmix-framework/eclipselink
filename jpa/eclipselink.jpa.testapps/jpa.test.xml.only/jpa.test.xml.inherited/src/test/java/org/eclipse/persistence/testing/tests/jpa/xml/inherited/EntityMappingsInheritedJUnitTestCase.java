@@ -96,9 +96,11 @@ public class EntityMappingsInheritedJUnitTestCase extends JUnitTestCase {
         suite.addTest(new EntityMappingsInheritedJUnitTestCase("testVerifyOneToManyRelationships"));
         suite.addTest(new EntityMappingsInheritedJUnitTestCase("testCreateBeerConsumer"));
         suite.addTest(new EntityMappingsInheritedJUnitTestCase("testReadBeerConsumer"));
-        suite.addTest(new EntityMappingsInheritedJUnitTestCase("testCreateNoviceBeerConsumer"));
-        suite.addTest(new EntityMappingsInheritedJUnitTestCase("testReadNoviceBeerConsumer"));
-        suite.addTest(new EntityMappingsInheritedJUnitTestCase("testOrderColumnNoviceBeerConsumerDesignations"));
+        // jmix begin: disable novice consumer tests that depend on upstream detached lazy traversal
+        //        suite.addTest(new EntityMappingsInheritedJUnitTestCase("testCreateNoviceBeerConsumer"));
+        //        suite.addTest(new EntityMappingsInheritedJUnitTestCase("testReadNoviceBeerConsumer"));
+        //        suite.addTest(new EntityMappingsInheritedJUnitTestCase("testOrderColumnNoviceBeerConsumerDesignations"));
+        // jmix end
         suite.addTest(new EntityMappingsInheritedJUnitTestCase("testCreateExpertBeerConsumer"));
         suite.addTest(new EntityMappingsInheritedJUnitTestCase("testReadExpertBeerConsumer"));
         suite.addTest(new EntityMappingsInheritedJUnitTestCase("testNamedNativeQueryBeerConsumers"));

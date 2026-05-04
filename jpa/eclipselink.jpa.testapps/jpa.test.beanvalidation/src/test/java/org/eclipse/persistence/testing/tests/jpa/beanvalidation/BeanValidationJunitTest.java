@@ -481,8 +481,11 @@ public class BeanValidationJunitTest extends JUnitTestCase {
 
             final ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
             final Set<ConstraintViolation<?>> constraintViolations = cve.getConstraintViolations();
-            final ConstraintViolation constraintViolation = constraintViolations.iterator().next();
-            assertEquals("must not be null", constraintViolation.getMessage());
+            // jmix begin: assert provider-neutral violation details
+            final ConstraintViolation<?> constraintViolation = constraintViolations.iterator().next();
+            assertEquals("{jakarta.validation.constraints.NotNull.message}", constraintViolation.getMessageTemplate());
+            assertEquals("name", constraintViolation.getPropertyPath().toString());
+            // jmix end
             gotConstraintViolations = true;
         } finally {
             if (isTransactionActive(em)) {

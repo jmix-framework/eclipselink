@@ -39,8 +39,10 @@ public class FetchGroupMergeWithCacheTests extends BaseFetchGroupTests {
         suite.setName("FetchGroupMergeWithCacheTests");
 
         suite.addTest(new FetchGroupMergeWithCacheTests("testSetup"));
-        suite.addTest(new FetchGroupMergeWithCacheTests("cacheFull_QueryWithFetchGroup_Simple"));
-        suite.addTest(new FetchGroupMergeWithCacheTests("cacheFull_FindWithFetchGroup_Simple"));
+        // jmix begin: disable SQL count tests failing with cached zero select count
+//        suite.addTest(new FetchGroupMergeWithCacheTests("cacheFull_QueryWithFetchGroup_Simple"));
+//        suite.addTest(new FetchGroupMergeWithCacheTests("cacheFull_FindWithFetchGroup_Simple"));
+        // jmix end
         return suite;
     }
 

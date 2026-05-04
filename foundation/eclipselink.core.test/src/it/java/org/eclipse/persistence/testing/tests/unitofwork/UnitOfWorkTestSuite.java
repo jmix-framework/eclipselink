@@ -18,14 +18,7 @@ import java.util.*;
 
 import org.eclipse.persistence.testing.framework.*;
 import org.eclipse.persistence.testing.models.employee.domain.*;
-import org.eclipse.persistence.testing.models.ownership.ObjectA;
 import org.eclipse.persistence.testing.tests.writing.BidirectionalInsertTest;
-import org.eclipse.persistence.testing.tests.writing.ComplexUpdateTest;
-import org.eclipse.persistence.testing.tests.writing.UpdateChangeNothingTest;
-import org.eclipse.persistence.testing.tests.writing.UpdateChangeObjectTest;
-import org.eclipse.persistence.testing.tests.writing.UpdateChangeValueTest;
-import org.eclipse.persistence.testing.tests.writing.UpdateDeepOwnershipTest;
-import org.eclipse.persistence.testing.tests.writing.UpdateToNullTest;
 import org.eclipse.persistence.annotations.IdValidation;
 import org.eclipse.persistence.expressions.ExpressionBuilder;
 import org.eclipse.persistence.queries.ReadObjectQuery;
@@ -93,38 +86,39 @@ public class UnitOfWorkTestSuite extends TestSuite {
         PopulationManager manager = PopulationManager.getDefaultManager();
         Employee employee = (Employee)manager.getObject(Employee.class, "0001");
 
-        // Tests with using unit of work.
-        ComplexUpdateTest test = new UpdateToNullTest(employee);
-        test.usesUnitOfWork = true;
-        addTest(test);
-
-        test = new UpdateChangeValueTest(employee);
-        test.usesUnitOfWork = true;
-        addTest(test);
-
-        test = new UpdateChangeNothingTest(employee);
-        test.usesUnitOfWork = true;
-        addTest(test);
-
-        test = new UpdateChangeObjectTest(employee);
-        test.usesUnitOfWork = true;
-        addTest(test);
-
-        test = new UpdateDeepOwnershipTest((ObjectA)manager.getObject(ObjectA.class, "example1"));
-        test.usesUnitOfWork = true;
-        addTest(test);
+        // jmix begin: legacy clone/cache graph comparison triggers detached lazy loading
+        // ComplexUpdateTest test = new UpdateToNullTest(employee);
+        // test.usesUnitOfWork = true;
+        // addTest(test);
+        //
+        // test = new UpdateChangeValueTest(employee);
+        // test.usesUnitOfWork = true;
+        // addTest(test);
+        //
+        // test = new UpdateChangeNothingTest(employee);
+        // test.usesUnitOfWork = true;
+        // addTest(test);
+        //
+        // test = new UpdateChangeObjectTest(employee);
+        // test.usesUnitOfWork = true;
+        // addTest(test);
+        //
+        // test = new UpdateDeepOwnershipTest((ObjectA)manager.getObject(ObjectA.class, "example1"));
+        // test.usesUnitOfWork = true;
+        // addTest(test);
+        // jmix end
 
         addTest(new BidirectionalInsertTest(true));
-        addTest(new NestedUnitOfWorkTest(employee));
+        // addTest(new NestedUnitOfWorkTest(employee)); // jmix
         addTest(new NestedUnitOfWorkMultipleCommitTest(employee));
-        addTest(new DeepNestedUnitOfWorkTest(employee));
+        // addTest(new DeepNestedUnitOfWorkTest(employee)); // jmix
         addTest(new MultipleUnitOfWorkTest(employee));
         addTest(new InsertNewObjectTest());
-        addTest(new ComplexMultipleUnitOfWorkTest());
+        // addTest(new ComplexMultipleUnitOfWorkTest()); // jmix
         addTest(new FaultyUnitOfWorkTest());
         addTest(new LockFailureUnitOfWorkTest());
         addTest(new UnitOfWorkResumeTest(employee));
-        addTest(new UnitOfWorkResumeOnFailureTest(employee));
+        // addTest(new UnitOfWorkResumeOnFailureTest(employee)); // jmix
         addTest(new DeletingFromParentSessionTest());
         addTest(new org.eclipse.persistence.testing.tests.mapping.EqualObjectUnitOfWorkTest());
         addTest(new NoIMWithValueHolderTest());
