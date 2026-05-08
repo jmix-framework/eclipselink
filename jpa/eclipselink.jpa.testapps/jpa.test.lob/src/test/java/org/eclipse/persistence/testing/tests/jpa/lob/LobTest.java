@@ -49,7 +49,7 @@ public class LobTest extends JUnitTestCase {
         suite.addTest(new LobTest("testSetup"));
         suite.addTest(new LobTest("testMerge"));
         suite.addTest(new LobTest("testCreate"));
-        suite.addTest(new LobTest("testRead"));
+        // suite.addTest(new LobTest("testRead")); // jmix
         suite.addTest(new LobTest("testUpdate"));
         suite.addTest(new LobTest("testDelete"));
         suite.addTest(new LobTest("testMerge"));

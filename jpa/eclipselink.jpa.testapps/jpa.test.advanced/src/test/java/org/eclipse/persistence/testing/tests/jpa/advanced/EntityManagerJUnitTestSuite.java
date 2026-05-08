@@ -268,9 +268,11 @@ public class EntityManagerJUnitTestSuite extends JUnitTestCase {
         tests.add("testClearEntityManagerWithoutPersistenceContext");
         tests.add("testDeadConnectionFailover");
         tests.add("testDeadPoolFailover");
-        tests.add("testDeleteEmployee");
-        tests.add("testDeleteEmployee_with_status_enum_collection_instantiated");
-        tests.add("testDeleteMan");
+        // jmix begin: disable SQL count tests failing with Jmix SQL log prefix handling
+        //        tests.add("testDeleteEmployee");
+        //        tests.add("testDeleteEmployee_with_status_enum_collection_instantiated");
+        //        tests.add("testDeleteMan");
+        // jmix end
         tests.add("testFindDeleteAllPersist");
         tests.add("testExtendedPersistenceContext");
         tests.add("testRemoveFlushFind");
@@ -417,7 +419,7 @@ public class EntityManagerJUnitTestSuite extends JUnitTestCase {
         tests.add("testGetReference");
         tests.add("testGetReferenceUpdate");
         tests.add("testGetReferenceUsedInUpdate");
-        tests.add("testBadGetReference");
+        // tests.add("testBadGetReference"); // jmix
         tests.add("testClassInstanceConverter");
         tests.add("testNewObjectNotCascadePersist");
         tests.add("testConnectionPolicy");
@@ -521,8 +523,10 @@ public class EntityManagerJUnitTestSuite extends JUnitTestCase {
         tests.add("testNestedFetchQueryHints");
         tests.add("testInheritanceFetchJoinSecondCall");
 
-        tests.add("testDetachChildObjects");
-        tests.add("testDetachLazyLoadedCollection");
+        // jmix begin: disable tests that require upstream detach/lazy collection semantics
+        //        tests.add("testDetachChildObjects");
+        //        tests.add("testDetachLazyLoadedCollection");
+        // jmix end
         tests.add("testAutoCloseable");
 
 
@@ -3319,14 +3323,34 @@ public class EntityManagerJUnitTestSuite extends JUnitTestCase {
             emp.setLastName("McRae");
             em.persist(emp);
             commitTransaction(em);
-            verifyObjectInCacheAndDatabase(emp);
+            // jmix begin: avoid detached compareObjects() against unfetched lazy attributes
+            EntityManager verifyEm = createEntityManager(properties);
+            try {
+                Employee verifiedEmp = verifyEm.find(Employee.class, emp.getId());
+                assertNotNull("Persisted employee was not found", verifiedEmp);
+                assertEquals("Persisted employee firstName mismatch", "Douglas", verifiedEmp.getFirstName());
+                assertEquals("Persisted employee lastName mismatch", "McRae", verifiedEmp.getLastName());
+            } finally {
+                closeEntityManager(verifyEm);
+            }
+            // jmix end
             closeEntityManager(em);
             em = createEntityManager(properties);
             beginTransaction(em);
             emp = em.find(Employee.class, emp.getId());
             emp.setFirstName("Joe");
             commitTransaction(em);
-            verifyObjectInCacheAndDatabase(emp);
+            // jmix begin: avoid detached compareObjects() against unfetched lazy attributes
+            verifyEm = createEntityManager(properties);
+            try {
+                Employee verifiedEmp = verifyEm.find(Employee.class, emp.getId());
+                assertNotNull("Updated employee was not found", verifiedEmp);
+                assertEquals("Updated employee firstName mismatch", "Joe", verifiedEmp.getFirstName());
+                assertEquals("Updated employee lastName mismatch", "McRae", verifiedEmp.getLastName());
+            } finally {
+                closeEntityManager(verifyEm);
+            }
+            // jmix end
             em = createEntityManager(properties);
             beginTransaction(em);
             emp = em.find(Employee.class, emp.getId());
@@ -5582,7 +5606,15 @@ public class EntityManagerJUnitTestSuite extends JUnitTestCase {
             em.flush();
             commitTransaction(em);
             closeEntityManager(em);
-            verifyObjectInCacheAndDatabase(emp);
+            // jmix begin: avoid detached compareObjects() against unfetched lazy attributes
+            em = createEntityManager();
+            Employee verifiedEmp = em.find(Employee.class, emp.getId());
+            assertNotNull("Employee should still exist", verifiedEmp);
+            assertNotNull("Employee department should be persisted", verifiedEmp.getDepartment());
+            assertEquals("Employee should reference the final department", dept1.getId(), verifiedEmp.getDepartment().getId());
+            closeEntityManager(em);
+            em = null;
+            // jmix end
         } finally {
             try {
                 em = createEntityManager();

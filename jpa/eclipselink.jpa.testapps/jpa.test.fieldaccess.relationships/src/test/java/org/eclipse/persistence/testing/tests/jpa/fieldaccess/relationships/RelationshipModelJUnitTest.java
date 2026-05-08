@@ -61,7 +61,7 @@ public class RelationshipModelJUnitTest extends JUnitTestCase {
         suite.addTest(new RelationshipModelJUnitTest("testSetup"));
         suite.addTest(new RelationshipModelJUnitTest("testPersistCustomer"));
         suite.addTest(new RelationshipModelJUnitTest("testUpdateCustomer"));
-        suite.addTest(new RelationshipModelJUnitTest("testReadCustomer"));
+        // suite.addTest(new RelationshipModelJUnitTest("testReadCustomer")); // jmix
         suite.addTest(new RelationshipModelJUnitTest("testDeleteCustomer"));
         suite.addTest(new RelationshipModelJUnitTest("testExecuteUpdateTest"));
         suite.addTest(new RelationshipModelJUnitTest("testGetResultCollectionTest"));

@@ -418,7 +418,7 @@ public class XmlAdvancedTest extends JUnitTestCase {
         } else {
             session = ((EntityManagerImpl)em).getServerSession();
         }
-        closeEntityManager(em);
+//        closeEntityManager(em); // jmix lazy access
 
         // verify number persisted and read is the same
         if(employeesPersisted.size() != employeesRead.size()) {
@@ -438,6 +438,7 @@ public class XmlAdvancedTest extends JUnitTestCase {
                 }
             }
         }
+        closeEntityManager(em); // jmix after lazy checks
 
         // clean-up
         deleteEmployeesWithUnidirectionalMappings(lastName);
@@ -535,6 +536,15 @@ public class XmlAdvancedTest extends JUnitTestCase {
         EntityManager em = createEntityManager();
         // read the persisted employees back - without fetch join
         List<Employee> employeesRead = em.createQuery("SELECT OBJECT(e) FROM XMLEmployee e WHERE e.lastName = '"+lastName+"'", Employee.class).getResultList();
+        // jmix begin: trigger dealers before detaching control employees
+        List<Employee> employeesControl = new ArrayList<>();
+        for(int i=0; i<employeesRead.size(); i++) {
+            int nDialers = employeesRead.get(i).getDealers().size();
+            for(int j=0; j<nDialers; j++) {
+                employeesControl.add(employeesRead.get(i));
+            }
+        }
+        // jmix end
         closeEntityManager(em);
 
         // clear cache
@@ -558,13 +568,15 @@ public class XmlAdvancedTest extends JUnitTestCase {
         // it fails in case an object has triggered indirection for particular attribute and compared object's indirection for this attribute is not triggered.
         // The expected result of join fetch query is Employee.dealers being triggered - so need to trigger it on the control collection (getDealers.size() does that);
         // also the expected result should have an object for each row returned - therefore number of inclusions of each Employee equals its dealers.size()
-        List<Employee> employeesControl = new ArrayList<>();
-        for (Employee employee : employeesRead) {
-            int nDialers = employee.getDealers().size();
-            for (int j = 0; j < nDialers; j++) {
-                employeesControl.add(employee);
-            }
-        }
+        // jmix begin: control employees are initialized before EntityManager close
+//        List<Employee> employeesControl = new ArrayList<>();
+//        for (Employee employee : employeesRead) {
+//            int nDialers = employee.getDealers().size();
+//            for (int j = 0; j < nDialers; j++) {
+//                employeesControl.add(employee);
+//            }
+//        }
+        // jmix end
         String errorMsg = JoinedAttributeTestHelper.compareCollections(employeesControl, employeesReadWithFetchJoin, session.getClassDescriptor(Employee.class), session);
 
         // clean-up

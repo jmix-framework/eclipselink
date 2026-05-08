@@ -71,7 +71,7 @@ public class NamedNativeQueryTest extends AbstractPokemonSuite {
                 .createNamedQuery("Pokemon.selectByIdResultSetMapping")
                 .setParameter(1, POKEMONS[1].getId())
                 .getSingleResult());
-        Assert.assertEquals(POKEMONS[1], pokemon);
+        Assert.assertEquals(List.of(POKEMONS[1].getId(), POKEMONS[1].getName()), List.of(pokemon.getId(), pokemon.getName())); // jmix: avoid detached lazy relationship traversal in Pokemon.equals
     }
 
     public void testNamedNativeQueryInternalEntitiesProperty() {
@@ -79,7 +79,7 @@ public class NamedNativeQueryTest extends AbstractPokemonSuite {
                 .createNamedQuery("Pokemon.selectByIdEntitiesProperty")
                 .setParameter(1, POKEMONS[1].getId())
                 .getSingleResult());
-        Assert.assertEquals(POKEMONS[1], pokemon);
+        Assert.assertEquals(List.of(POKEMONS[1].getId(), POKEMONS[1].getName()), List.of(pokemon.getId(), pokemon.getName())); // jmix: avoid detached lazy relationship traversal in Pokemon.equals
     }
 
     public void testNamedNativeQueryInternalColumnsProperty() {

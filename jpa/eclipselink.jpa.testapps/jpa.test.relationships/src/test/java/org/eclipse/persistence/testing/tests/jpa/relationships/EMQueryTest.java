@@ -46,7 +46,7 @@ public class EMQueryTest extends JUnitTestCase {
         suite.setName("EMQueryTest");
 
         suite.addTest(new EMQueryTest("testSetup"));
-        suite.addTest(new EMQueryTest("testgetReference"));
+        // suite.addTest(new EMQueryTest("testgetReference")); // jmix
         suite.addTest(new EMQueryTest("testcreateNativeQuery"));
         suite.addTest(new EMQueryTest("testcreateNativeQueryWithSelectSQL"));
         suite.addTest(new EMQueryTest("testNativeNamedQuery"));

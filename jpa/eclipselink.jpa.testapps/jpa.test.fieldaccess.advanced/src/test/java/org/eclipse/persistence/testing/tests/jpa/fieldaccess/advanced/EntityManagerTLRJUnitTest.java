@@ -3774,7 +3774,7 @@ public class EntityManagerTLRJUnitTest extends JUnitTestCase {
         String error = null;
         em = createEntityManager();
         List result = em.createQuery("SELECT OBJECT(e) FROM Employee e WHERE e.firstName = '"+firstName+"'").getResultList();
-        closeEntityManager(em);
+//        closeEntityManager(em); // jmix lazy access
         int nReadBack = result.size();
         if(n != nUpdated) {
             error = "n = "+n+", but nUpdated ="+nUpdated+";";
@@ -3795,6 +3795,7 @@ public class EntityManagerTLRJUnitTest extends JUnitTestCase {
                 error = " Employee " + emp.getLastName() + " has wrong roomNumber " + emp.getRoomNumber() + ";";
             }
         }
+        closeEntityManager(em); // jmix after lazy checks
 
         // clean up
         em = createEntityManager();

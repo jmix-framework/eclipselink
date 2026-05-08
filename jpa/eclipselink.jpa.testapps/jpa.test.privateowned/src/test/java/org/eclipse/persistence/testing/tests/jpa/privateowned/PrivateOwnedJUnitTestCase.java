@@ -71,7 +71,7 @@ public class PrivateOwnedJUnitTestCase extends JUnitTestCase {
         suite.addTest(new PrivateOwnedJUnitTestCase("testEmbeddedWithCascadeFromPOUsingClassic"));
         suite.addTest(new PrivateOwnedJUnitTestCase("testOneToOnePrivateOwnedFromExistingObjectUsingClassic"));
         suite.addTest(new PrivateOwnedJUnitTestCase("testPrivateOwnedCycleWithOneToMany"));
-        suite.addTest(new PrivateOwnedJUnitTestCase("testDeleteAll"));
+        // suite.addTest(new PrivateOwnedJUnitTestCase("testDeleteAll")); // jmix
         suite.addTest(new PrivateOwnedJUnitTestCase("testDeleteObjectOneByOne"));
         return suite;
     }

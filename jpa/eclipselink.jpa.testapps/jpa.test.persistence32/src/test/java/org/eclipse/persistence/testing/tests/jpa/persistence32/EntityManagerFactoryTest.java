@@ -264,15 +264,14 @@ public class EntityManagerFactoryTest extends AbstractPokemonSuite {
 
     // Test <E> void PersistenceUnitUtil#load(E, Attribute<? super E, ?>) on lazy entity reference
     public void testLoadEntityAttribute() {
-        Trainer t = emf.callInTransaction(
-                em -> em.createQuery("SELECT t FROM Trainer t WHERE t.name = :name", Trainer.class)
-                        .setParameter("name", "Ash")
-                        .getSingleResult());
-        PersistenceUnitUtil util = emf.getPersistenceUnitUtil();
-        // This mapping is lazy, so it shall not be loaded
-        assertFalse("Entity lazy attribute Trainer.team should not be loaded", util.isLoaded(t, Trainer_.team));
-        util.load(t, Trainer_.team);
-        assertTrue("Entity lazy attribute Trainer.team should be loaded after load call", util.isLoaded(t, Trainer_.team));
+        emf.runInTransaction(em -> { // jmix: Jmix does not load unfetched lazy relationship from detached object
+            Trainer t = em.createQuery("SELECT t FROM Trainer t WHERE t.name = :name", Trainer.class).setParameter("name", "Ash").getSingleResult();
+            PersistenceUnitUtil util = emf.getPersistenceUnitUtil();
+            // This mapping is lazy, so it shall not be loaded
+            assertFalse("Entity lazy attribute Trainer.team should not be loaded", util.isLoaded(t, Trainer_.team));
+            util.load(t, Trainer_.team);
+            assertTrue("Entity lazy attribute Trainer.team should be loaded after load call", util.isLoaded(t, Trainer_.team));
+        });
     }
 
     // Test <E> boolean PersistenceUnitUtil#isLoaded(Object, String) on lazy entity reference
@@ -288,17 +287,14 @@ public class EntityManagerFactoryTest extends AbstractPokemonSuite {
 
     // Test <E> void PersistenceUnitUtil#load(Object, String) on lazy entity reference
     public void testLoadEntityNamedAttribute() {
-        Trainer t = emf.callInTransaction(
-                em -> em.createQuery("SELECT t FROM Trainer t WHERE t.name = :name", Trainer.class)
-                        .setParameter("name", "Ash")
-                        .getSingleResult());
-        PersistenceUnitUtil util = emf.getPersistenceUnitUtil();
-        // This mapping is lazy, so it shall not be loaded
-        assertFalse("Entity lazy attribute Trainer.team should not be loaded",
-                    util.isLoaded(t, "team"));
-        util.load(t, "team");
-        assertTrue("Entity lazy attribute Trainer.team should be loaded after load call",
-                   util.isLoaded(t, "team"));
+        emf.runInTransaction(em -> { // jmix: Jmix does not load unfetched lazy relationship from detached object
+            Trainer t = em.createQuery("SELECT t FROM Trainer t WHERE t.name = :name", Trainer.class).setParameter("name", "Ash").getSingleResult();
+            PersistenceUnitUtil util = emf.getPersistenceUnitUtil();
+            // This mapping is lazy, so it shall not be loaded
+            assertFalse("Entity lazy attribute Trainer.team should not be loaded", util.isLoaded(t, "team"));
+            util.load(t, "team");
+            assertTrue("Entity lazy attribute Trainer.team should be loaded after load call", util.isLoaded(t, "team"));
+        });
     }
 
     // Verify Pokemon entity fetch groups: custom FetchTypes FetchGroup must be defined

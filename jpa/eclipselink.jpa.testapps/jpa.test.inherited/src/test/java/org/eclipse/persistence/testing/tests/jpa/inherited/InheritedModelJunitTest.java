@@ -384,8 +384,15 @@ public class InheritedModelJunitTest extends JUnitTestCase {
 
         clearCache();
         em = createEntityManager();
-        BeerConsumer refreshedBC = em.find(BeerConsumer.class, m_noviceBeerConsumerId);
-        assertTrue("The novice beer consumer read back did not match the original", getServerSession().compareObjects(beerConsumer, refreshedBC));
+        // jmix begin: avoid detached compareObjects() against unrelated unfetched lazy attributes
+        NoviceBeerConsumer refreshedBC = em.find(NoviceBeerConsumer.class, m_noviceBeerConsumerId);
+        assertEquals("Incorrect number of designations returned.", 5, refreshedBC.getDesignations().size());
+        assertEquals("Missing designation - 5 at index 0", "5", refreshedBC.getDesignations().get(0));
+        assertEquals("Missing designation - 4 at index 1", "4", refreshedBC.getDesignations().get(1));
+        assertEquals("Missing designation - 2 at index 2", "2", refreshedBC.getDesignations().get(2));
+        assertEquals("Missing designation - 3 at index 3", "3", refreshedBC.getDesignations().get(3));
+        assertEquals("Missing designation - 1 at index 4", "1", refreshedBC.getDesignations().get(4));
+        // jmix end
     }
 
     public void testReadBlue() {
@@ -796,8 +803,10 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             // verify in cache
             em = createEntityManager();
             consumer = em.find(ExpertBeerConsumer.class, m_expertBeerConsumerId);
-            closeEntityManager(em);
+            // jmix begin: access lazy records before closing EntityManager
             nRecords = consumer.getRecords().size();
+            closeEntityManager(em);
+            // jmix end
             if(nRecords != nRecordsExpected) {
                 errorMsg.append("cache: wrong number of records after remove; ");
             }
@@ -805,8 +814,10 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             clearCache();
             em = createEntityManager();
             consumer = em.find(ExpertBeerConsumer.class, m_expertBeerConsumerId);
-            closeEntityManager(em);
+            // jmix begin: access lazy records before closing EntityManager
             nRecords = consumer.getRecords().size();
+            closeEntityManager(em);
+            // jmix end
             if(nRecords != nRecordsExpected) {
                 errorMsg.append("db: wrong number of records after remove; ");
             }
@@ -830,8 +841,10 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             // verify in cache
             em = createEntityManager();
             consumer = em.find(ExpertBeerConsumer.class, m_expertBeerConsumerId);
-            closeEntityManager(em);
+            // jmix begin: access lazy records before closing EntityManager
             nRecords = consumer.getRecords().size();
+            closeEntityManager(em);
+            // jmix end
             if(nRecords != nRecordsExpected) {
                 errorMsg.append("cache: wrong number of records after add; ");
             }
@@ -839,8 +852,10 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             clearCache();
             em = createEntityManager();
             consumer = em.find(ExpertBeerConsumer.class, m_expertBeerConsumerId);
-            closeEntityManager(em);
+            // jmix begin: access lazy records before closing EntityManager
             nRecords = consumer.getRecords().size();
+            closeEntityManager(em);
+            // jmix end
             if(nRecords != nRecordsExpected) {
                 errorMsg.append("db: wrong number of records after add; ");
             }
@@ -867,7 +882,7 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             // verify in cache
             em = createEntityManager();
             consumer = em.find(ExpertBeerConsumer.class, m_expertBeerConsumerId);
-            closeEntityManager(em);
+            // jmix begin: access lazy records before closing EntityManager
             nRecords = consumer.getRecords().size();
             if(nRecords != nRecordsExpected) {
                 errorMsg.append("cache: wrong number of records after update; ");
@@ -894,11 +909,13 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             if(usedNames.size() != nRecords) {
                 errorMsg.append("cache: venues with same name; ");
             }
+            closeEntityManager(em);
+            // jmix end
             // verify in db
             clearCache();
             em = createEntityManager();
             consumer = em.find(ExpertBeerConsumer.class, m_expertBeerConsumerId);
-            closeEntityManager(em);
+            // jmix begin: access lazy records before closing EntityManager
             nRecords = consumer.getRecords().size();
             if(nRecords != nRecordsExpected) {
                 errorMsg.append("db: wrong number of records after update; ");
@@ -925,6 +942,8 @@ public class InheritedModelJunitTest extends JUnitTestCase {
             if(usedNames.size() != nRecords) {
                 errorMsg.append("db: venues with same name; ");
             }
+            closeEntityManager(em);
+            // jmix end
 
             if(errorMsg.length() > 0) {
                 fail(errorMsg.toString());

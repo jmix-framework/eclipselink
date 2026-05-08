@@ -16,6 +16,8 @@ package org.eclipse.persistence.jpars.test.service.v2;
 
 import org.eclipse.persistence.jpars.test.service.EmployeeTestBase;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * EmployeeTestBase adapted for JPARS 2.0.
@@ -30,4 +32,18 @@ public class EmployeeV2Test extends EmployeeTestBase {
     public static void setup() throws Exception {
         initContext("jpars_employee-static", "v2.0");
     }
+
+    // jmix begin: disable JPARS tests conflicting with detached lazy-loading guard
+    @Override
+    @Test
+    @Ignore("JPARS inverse relationship loading conflicts with the Jmix detached lazy-loading guard")
+    public void testMarshalUnMarshalEmployeeJSON() {
+    }
+
+    @Override
+    @Test
+    @Ignore("JPARS inverse relationship loading conflicts with the Jmix detached lazy-loading guard")
+    public void testMarshalUnMarshalEmployeeXML() {
+    }
+    // jmix end
 }
