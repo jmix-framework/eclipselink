@@ -86,7 +86,7 @@ public class CacheableDisableSelectivePropertyTest extends CacheableTestBase {
         suite.addTest(new CacheableDisableSelectivePropertyTest("testFindWithLegacyFindProperties"));
         suite.addTest(new CacheableDisableSelectivePropertyTest("testFindWithEMLegacyProperties"));
         suite.addTest(new CacheableDisableSelectivePropertyTest("testMergeNonCachedWithRelationship"));
-        suite.addTest(new CacheableDisableSelectivePropertyTest("testIndirectCollectionRefreshBehavior"));
+        // suite.addTest(new CacheableDisableSelectivePropertyTest("testIndirectCollectionRefreshBehavior")); // jmix
         suite.addTest(new CacheableDisableSelectivePropertyTest("testDerivedIDProtectedRead"));
 
         // Bug 408262

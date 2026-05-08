@@ -38,12 +38,10 @@ public class EnumTest extends AbstractPokemonSuite {
     }
 
     public void testGetTrainer() {
-               Trainer trainer = emf.callInTransaction(em -> em
-                .createQuery("SELECT e FROM Trainer e WHERE e.id=:id",
-                             Trainer.class)
-                .setParameter("id", TRAINERS[1].getId())
-                .getSingleResult());
-        assertEquals(TRAINERS[1], trainer);
+        emf.runInTransaction(em -> { // jmix: run equality while Trainer is managed to avoid detached lazy relationship traversal
+            Trainer trainer = em.createQuery("SELECT e FROM Trainer e WHERE e.id=:id", Trainer.class).setParameter("id", TRAINERS[1].getId()).getSingleResult();
+            assertEquals(TRAINERS[1], trainer);
+        });
     }
 
     public void testGetTrainerEnumOrdinalValue() {

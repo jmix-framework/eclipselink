@@ -32,6 +32,7 @@ import org.eclipse.persistence.testing.tests.jpa.dynamic.DynamicTestHelper;
 import org.eclipse.persistence.testing.tests.jpa.dynamic.QuerySQLTracker;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.eclipse.persistence.logging.SessionLog.FINE;
@@ -111,6 +112,7 @@ public class EmployeeSparseMergeTestSuite {
         log = null;
     }
 
+    @Ignore("SQL count expectation is not compatible with Jmix SQL log prefix handling") // jmix
     @Test
     public void mergeSparseDynamicEntityWithFetchGroup() {
         EntityManager em = emf.createEntityManager();

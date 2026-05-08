@@ -386,11 +386,13 @@ public class InheritanceTestModel extends TestModel {
         suite.setName("InheritanceUnitOfWorkTestSuite");
         suite.setDescription("This suite tests updating objects with UOW in the inheritance model.");
 
-        PopulationManager manager = PopulationManager.getDefaultManager();
-
-        suite.addTest(new UnitOfWorkTest(manager.getObject(Company.class, "example1")));
-        suite.addTest(new UnitOfWorkTest(manager.getObject(Company.class, "example2")));
-        suite.addTest(new UnitOfWorkTest(manager.getObject(Company.class, "example3")));
+        // jmix begin: legacy clone/cache graph comparison triggers detached lazy loading
+        // PopulationManager manager = PopulationManager.getDefaultManager();
+        //
+        // suite.addTest(new UnitOfWorkTest(manager.getObject(Company.class, "example1")));
+        // suite.addTest(new UnitOfWorkTest(manager.getObject(Company.class, "example2")));
+        // suite.addTest(new UnitOfWorkTest(manager.getObject(Company.class, "example3")));
+        // jmix end
 
         return suite;
     }

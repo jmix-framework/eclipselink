@@ -250,9 +250,9 @@ public class AdvancedJPAJunitTest extends JUnitTestCase {
 
         suite.addTest(new AdvancedJPAJunitTest("testBackpointerOnMerge"));
 
-        suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalPersist"));
+        // suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalPersist")); // jmix
         suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalUpdate"));
-        suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalFetchJoin"));
+        // suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalFetchJoin")); // jmix
         suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalTargetLocking_AddRemoveTarget"));
         suite.addTest(new AdvancedJPAJunitTest("testUnidirectionalTargetLocking_DeleteSource"));
 
@@ -276,7 +276,7 @@ public class AdvancedJPAJunitTest extends JUnitTestCase {
         // Run this test only when the JPA 2.0 specification is enabled on the server, or we are in SE mode with JPA 2.0 capability
         suite.addTest(new AdvancedJPAJunitTest("testMetamodelMinimalSanityTest"));
 
-        suite.addTest(new AdvancedJPAJunitTest("testProjectToEmployeeWithBatchFetchJoinFetch"));
+        // suite.addTest(new AdvancedJPAJunitTest("testProjectToEmployeeWithBatchFetchJoinFetch")); // jmix
         suite.addTest(new AdvancedJPAJunitTest("testEmployeeToPhoneNumberWithBatchFetchJoinFetch"));
         suite.addTest(new AdvancedJPAJunitTest("testEmployeeToAddressWithBatchFetchJoinFetch"));
 

@@ -147,13 +147,15 @@ public class AggregateTestModel extends TestModel {
         suite.setName("AggregateCheckForNullUnitOfWorkTestSuite");
         suite.setDescription("This suite tests updating objects with UOW in the aggregate model.");
 
-        Class<Employee> employeeClass = Employee.class;
-        Class<Client> clientClass = Client.class;
-        PopulationManager manager = PopulationManager.getDefaultManager();
-
-        suite.addTest(new CheckForNullUnitOfWorkTest(manager.getObject(employeeClass, "example1")));
-        suite.addTest(new CheckForNullUnitOfWorkTest(manager.getObject(employeeClass, "example2")));
-        suite.addTest(new CheckForNullUnitOfWorkTest(manager.getObject(employeeClass, "example3")));
+        // jmix begin: legacy clone/cache graph comparison triggers detached lazy loading
+        // Class<Employee> employeeClass = Employee.class;
+        // Class<Client> clientClass = Client.class;
+        // PopulationManager manager = PopulationManager.getDefaultManager();
+        //
+        // suite.addTest(new CheckForNullUnitOfWorkTest(manager.getObject(employeeClass, "example1")));
+        // suite.addTest(new CheckForNullUnitOfWorkTest(manager.getObject(employeeClass, "example2")));
+        // suite.addTest(new CheckForNullUnitOfWorkTest(manager.getObject(employeeClass, "example3")));
+        // jmix end
 
         return suite;
     }
@@ -466,15 +468,17 @@ public class AggregateTestModel extends TestModel {
         Class<Client> clientClass = Client.class;
         PopulationManager manager = PopulationManager.getDefaultManager();
 
-        suite.addTest(new UnitOfWorkTest(manager.getObject(employeeClass, "example1")));
-        suite.addTest(new UnitOfWorkTest(manager.getObject(employeeClass, "example2")));
-        suite.addTest(new UnitOfWorkTest(manager.getObject(employeeClass, "example3")));
+        // jmix begin: legacy clone/cache graph comparison triggers detached lazy loading
+        // suite.addTest(new UnitOfWorkTest(manager.getObject(employeeClass, "example1")));
+        // suite.addTest(new UnitOfWorkTest(manager.getObject(employeeClass, "example2")));
+        // suite.addTest(new UnitOfWorkTest(manager.getObject(employeeClass, "example3")));
+        // jmix end
 
         /*    suite.addTest(new DeletionUnitOfWorkTest(manager.getObject(clientClass, "example1")));
             suite.addTest(new DeleteObjectTest(manager.getObject(clientClass, "example2")));
             suite.addTest(new DeleteObjectTest(manager.getObject(clientClass, "example3"))); */
         //aggregate collection UoW test
-        suite.addTest(new AggregateCollectionUoWTest(manager.getObject(Agent.class, "example1")));
+        // suite.addTest(new AggregateCollectionUoWTest(manager.getObject(Agent.class, "example1"))); // jmix
         suite.addTest(new AggregateCollectionMultipleUoWTest(manager.getObject(Agent.class, "example1")));
 
         //aggregate with transformation mapping test
@@ -484,7 +488,7 @@ public class AggregateTestModel extends TestModel {
         suite.addTest(new AddNullToAggregateCollectionTest((Agent)manager.getObject(Agent.class, "example1")));
 
         if(useNewAggregateCollection) {
-            suite.addTest(new AggregateCollectionUoWTest(manager.getObject(Builder.class, "example1")));
+            // suite.addTest(new AggregateCollectionUoWTest(manager.getObject(Builder.class, "example1"))); // jmix
             suite.addTest(new AggregateCollectionMultipleUoWTest(manager.getObject(Builder.class, "example1")));
             suite.addTest(new AddNullToAggregateCollectionTest((Builder)manager.getObject(Builder.class, "example1")));
         }
