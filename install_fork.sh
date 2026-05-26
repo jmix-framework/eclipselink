@@ -4,7 +4,6 @@
 # $1 -  FORK_VERSION         - Version of fork to install
 
 FORK_VERSION="${1}"
-ORIGIN_VERSION=${FORK_VERSION%-jmix*}
 
 if [ $# -eq 0 ]
   then
@@ -12,10 +11,9 @@ if [ $# -eq 0 ]
     exit 1
 fi
 echo "============================================================================================================"
-echo "    Setting release version for dependencies: ${ORIGIN_VERSION}"
+echo "    Setting release version for dependencies"
 echo "============================================================================================================"
-# mvn versions:set -DremoveSnapshot todo enable when 5.0.0 will be released
-mvn versions:set -DnewVersion="${ORIGIN_VERSION}"
+mvn versions:set -DremoveSnapshot
 
 echo "============================================================================================================"
 echo "    Installing org.eclipse.persistence:org.eclipse.persistence.core:${FORK_VERSION} to Maven Local"
