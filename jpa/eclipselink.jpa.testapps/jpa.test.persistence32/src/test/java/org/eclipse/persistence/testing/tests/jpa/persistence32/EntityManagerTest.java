@@ -12,6 +12,7 @@
 package org.eclipse.persistence.testing.tests.jpa.persistence32;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.persistence.CacheRetrieveMode;
@@ -24,8 +25,17 @@ import jakarta.persistence.LockOption;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.Timeout;
 import junit.framework.Test;
+import org.eclipse.persistence.config.QueryHints;
 import org.eclipse.persistence.internal.descriptors.PersistenceEntity;
+import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
+import org.eclipse.persistence.internal.localization.ExceptionLocalization;
+import org.eclipse.persistence.queries.FetchGroup;
+import org.eclipse.persistence.queries.FetchGroupTracker;
+import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.testing.models.jpa.persistence32.Pokemon;
+import org.eclipse.persistence.testing.models.jpa.persistence32.Trainer;
+import org.eclipse.persistence.testing.models.jpa.persistence32.TrainerStatusOrdinal;
+import org.eclipse.persistence.testing.models.jpa.persistence32.TrainerStatusString;
 
 /**
  * Verify jakarta.persistence 3.2 API changes in {@link jakarta.persistence.EntityManager}.
@@ -47,6 +57,10 @@ public class EntityManagerTest extends AbstractPokemonSuite {
                 "EntityManagerTest",
                 new EntityManagerTest("testGetReferenceForExistingEntity"),
                 new EntityManagerTest("testGetReferenceForNotExistingEntity"),
+                // jmix begin: verify detached unfetched attribute exception
+                new EntityManagerTest("testDetachedUnfetchedAttributeThrowsIllegalStateException"),
+                new EntityManagerTest("testLiveSessionUnfetchedAttributeThrowsIllegalStateException"),
+                // jmix end
                 new EntityManagerTest("testLockOptionUtilsUnknownClass"),
                 new EntityManagerTest("testLockPessimisticWriteWithTimeout"),
                 new EntityManagerTest("testSetCacheRetrieveMode"),
@@ -100,8 +114,13 @@ public class EntityManagerTest extends AbstractPokemonSuite {
             EntityTransaction et = em.getTransaction();
             try {
                 et.begin();
-                Pokemon pokemon = new Pokemon(2, "Beedrill", List.of(TYPES[7], TYPES[4]));
-                Pokemon reference = em.getReference(pokemon);
+                // jmix begin: use a test entity with safe toString for missing-entity classification
+                // Pokemon pokemon = new Pokemon(2, "Beedrill", List.of(TYPES[7], TYPES[4]));
+                // Pokemon reference = em.getReference(pokemon);
+                Trainer trainer = new Trainer(4, "Giovanni", TEAMS[1],
+                        TrainerStatusOrdinal.ACTIVE, TrainerStatusString.ACTIVE);
+                Trainer reference = em.getReference(trainer);
+                // jmix end
                 assertTrue(reference instanceof PersistenceEntity);
                 try {
                     // Verify that access to entity attribute fails
@@ -119,6 +138,96 @@ public class EntityManagerTest extends AbstractPokemonSuite {
             }
         }
     }
+
+    // jmix begin: verify detached unfetched attribute exception
+    public void testDetachedUnfetchedAttributeThrowsIllegalStateException() {
+        if (isWeavingEnabled()) {
+            clearCache();
+
+            Trainer trainer = null;
+            try (EntityManager em = emf.createEntityManager()) {
+                trainer = em.find(Trainer.class, TRAINERS[2].getId(),
+                        Map.of(QueryHints.JPA_FETCH_GRAPH, em.getEntityGraph("Trainer.fetchGraph")));
+                assertNotNull("Trainer was not found", trainer);
+                assertFalse("Trainer statusString should not be loaded",
+                        em.getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(trainer, "statusString"));
+            }
+
+            try {
+                trainer.getStatusString();
+                fail("Accessing detached unfetched attribute shall throw IllegalStateException");
+            } catch (IllegalStateException ise) {
+                // Expected.
+            }
+        }
+    }
+
+    public void testLiveSessionUnfetchedAttributeThrowsIllegalStateException() {
+        FetchGroupTracker entity = new TestFetchGroupTracker();
+        entity._persistence_setSession(emf.getServerSession());
+        entity._persistence_setFetchGroup(new FetchGroup() {
+            @Override
+            public String onUnfetchedAttribute(FetchGroupTracker entity, String attributeName) {
+                return ExceptionLocalization.buildMessage("cannot_get_unfetched_attribute",
+                        new Object[]{entity, attributeName});
+            }
+        });
+
+        try {
+            EntityManagerImpl.processUnfetchedAttribute(entity, "status");
+            fail("Accessing live-session unfetched attribute shall throw IllegalStateException");
+        } catch (IllegalStateException ise) {
+            assertTrue("Unexpected exception message: " + ise.getMessage(),
+                    ise.getMessage().startsWith("Cannot get unfetched attribute [status]"));
+        } catch (EntityNotFoundException enfe) {
+            fail("Accessing live-session unfetched attribute shall throw IllegalStateException, not EntityNotFoundException");
+        }
+    }
+
+    private static class TestFetchGroupTracker implements FetchGroupTracker {
+
+        private FetchGroup fetchGroup;
+        private Session session;
+
+        @Override
+        public FetchGroup _persistence_getFetchGroup() {
+            return fetchGroup;
+        }
+
+        @Override
+        public void _persistence_setFetchGroup(FetchGroup group) {
+            this.fetchGroup = group;
+        }
+
+        @Override
+        public boolean _persistence_isAttributeFetched(String attribute) {
+            return false;
+        }
+
+        @Override
+        public void _persistence_resetFetchGroup() {
+        }
+
+        @Override
+        public boolean _persistence_shouldRefreshFetchGroup() {
+            return false;
+        }
+
+        @Override
+        public void _persistence_setShouldRefreshFetchGroup(boolean shouldRefreshFetchGroup) {
+        }
+
+        @Override
+        public Session _persistence_getSession() {
+            return session;
+        }
+
+        @Override
+        public void _persistence_setSession(Session session) {
+            this.session = session;
+        }
+    }
+    // jmix end
 
     // Call lock(Object, LockModeType, LockOption...) with unsupported LockOption instance
     // Shall throw PersistenceException

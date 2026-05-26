@@ -139,4 +139,11 @@ public class Trainer {
     public int hashCode() {
         return Objects.hash(id, name);
     }
+
+    // jmix begin: avoid unfetched attribute access in missing-entity test message formatting
+    @Override
+    public String toString() {
+        return "Trainer {id=" + id + "}";
+    }
+    // jmix end
 }
