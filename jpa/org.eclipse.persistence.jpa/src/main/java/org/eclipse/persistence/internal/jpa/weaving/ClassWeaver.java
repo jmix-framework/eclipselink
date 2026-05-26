@@ -96,7 +96,9 @@ public class ClassWeaver extends ClassVisitor {
     public static final String JPA_TRANSIENT_DESCRIPTION = "Ljakarta/persistence/Transient;";
     public static final String XML_TRANSIENT_DESCRIPTION = "Ljakarta/xml/bind/annotation/XmlTransient;";
 
-    public static final String ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE = "java/lang/IllegalStateException";//jmix
+    // jmix begin: route unfetched exception selection through EntityManagerImpl
+    private static final String ENTITY_MANAGER_IMPL_SHORT_SIGNATURE = "org/eclipse/persistence/internal/jpa/EntityManagerImpl";
+    // jmix end
 
     public static final String PERSISTENCE_SET = Helper.PERSISTENCE_SET;
     public static final String PERSISTENCE_GET = Helper.PERSISTENCE_GET;
@@ -1137,16 +1139,12 @@ public class ClassWeaver extends ClassVisitor {
      * <p>
      * public void _persistence_checkFetched(String attribute) { if
      * (!this._persistence_isAttributeFetched(var1)) {
-     * String var2 = this._persistence_getFetchGroup().onUnfetchedAttribute(this, var1);
-     * if (var2 != null) {
-     * throw new EntityNotFoundException(var2);}}}
+     * EntityManagerImpl.processUnfetchedAttribute(this, var1); }}
      * <p>
      *
-     * public void _persistence_checkSetFetched(String attribute) { if
-     * if (!this._persistence_isAttributeFetched(var1)) {
-     * String var2 = this._persistence_getFetchGroup().onUnfetchedAttributeForSet(this, var1);
-     * if (var2 != null) {
-     * throw new EntityNotFoundException(var2);}}}
+     * public void _persistence_checkFetchedForSet(String attribute) { if
+     * (!this._persistence_isAttributeFetched(var1)) {
+     * EntityManagerImpl.processUnfetchedAttributeForSet(this, var1); }}
      */
     public void addFetchGroupMethods(ClassDetails classDetails) {
         MethodVisitor cv_getSession = cv.visitMethod(Opcodes.ACC_PUBLIC, "_persistence_getSession", "()" + SESSION_SIGNATURE, null, null);
@@ -1222,24 +1220,13 @@ public class ClassWeaver extends ClassVisitor {
             cv_checkFetched.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classDetails.getClassName(), "_persistence_isAttributeFetched", "(" + STRING_SIGNATURE + ")Z", false);
             Label l1 = ASMFactory.createLabel();
             cv_checkFetched.visitJumpInsn(Opcodes.IFNE, l1);
-            // String errorMsg = _persistence_getFetchGroup().
-            cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 0);
-            cv_checkFetched.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classDetails.getClassName(), "_persistence_getFetchGroup", "()" + FETCHGROUP_SIGNATURE, false);
-            // .onUnfetchedAttribute(entity, attributeName);
+            // jmix begin: route unfetched exception selection through EntityManagerImpl
             cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 0);
             cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 1);
-            cv_checkFetched.visitMethodInsn(Opcodes.INVOKEVIRTUAL, FETCHGROUP_SHORT_SIGNATURE, "onUnfetchedAttribute", "(" + FETCHGROUP_TRACKER_SIGNATURE + STRING_SIGNATURE + ")" + STRING_SIGNATURE, false);
-            cv_checkFetched.visitVarInsn(Opcodes.ASTORE, 2);
-            cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 2);
-            cv_checkFetched.visitJumpInsn(Opcodes.IFNULL, l1);
-            // jmix: throw new IllegalStateException(errorMsg);
-            cv_checkFetched.visitTypeInsn(Opcodes.NEW, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE);// jmix
-            cv_checkFetched.visitInsn(Opcodes.DUP);
-            cv_checkFetched.visitVarInsn(Opcodes.ALOAD, 2);
-            cv_checkFetched.visitMethodInsn(Opcodes.INVOKESPECIAL, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE, "<init>", "(" + STRING_SIGNATURE + ")V", false);// jmix
-            cv_checkFetched.visitInsn(Opcodes.ATHROW);
+            cv_checkFetched.visitMethodInsn(Opcodes.INVOKESTATIC, ENTITY_MANAGER_IMPL_SHORT_SIGNATURE, "processUnfetchedAttribute", "(" + FETCHGROUP_TRACKER_SIGNATURE + STRING_SIGNATURE + ")V", false);
+            // jmix end
             cv_checkFetched.visitLabel(l1);
-            cv_checkFetched.visitFrame(Opcodes.F_APPEND, 1, new Object[]{"java/lang/String"}, 0, null);
+            cv_checkFetched.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
             cv_checkFetched.visitInsn(Opcodes.RETURN);
             cv_checkFetched.visitMaxs(0, 0);
         }
@@ -1254,24 +1241,13 @@ public class ClassWeaver extends ClassVisitor {
             cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classDetails.getClassName(), "_persistence_isAttributeFetched", "(" + STRING_SIGNATURE + ")Z", false);
             Label l1 = ASMFactory.createLabel();
             cv_checkFetchedForSet.visitJumpInsn(Opcodes.IFNE, l1);
-            // String errorMsg = _persistence_getFetchGroup().
-            cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 0);
-            cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classDetails.getClassName(), "_persistence_getFetchGroup", "()" + FETCHGROUP_SIGNATURE, false);
-            // .onUnfetchedAttribute(entity, attributeName);
+            // jmix begin: route unfetched exception selection through EntityManagerImpl
             cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 0);
             cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 1);
-            cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKEVIRTUAL, FETCHGROUP_SHORT_SIGNATURE, "onUnfetchedAttributeForSet", "(" + FETCHGROUP_TRACKER_SIGNATURE + STRING_SIGNATURE + ")" + STRING_SIGNATURE, false);
-            cv_checkFetchedForSet.visitVarInsn(Opcodes.ASTORE, 2);
-            cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 2);
-            cv_checkFetchedForSet.visitJumpInsn(Opcodes.IFNULL, l1);
-            // jmix: throw new IllegalStateException(errorMsg);
-            cv_checkFetchedForSet.visitTypeInsn(Opcodes.NEW, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE);// jmix
-            cv_checkFetchedForSet.visitInsn(Opcodes.DUP);
-            cv_checkFetchedForSet.visitVarInsn(Opcodes.ALOAD, 2);
-            cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKESPECIAL, ILLEGAL_STATE_EXCEPTION_SHORT_SIGNATURE, "<init>", "(" + STRING_SIGNATURE + ")V", false);// jmix
-            cv_checkFetchedForSet.visitInsn(Opcodes.ATHROW);
+            cv_checkFetchedForSet.visitMethodInsn(Opcodes.INVOKESTATIC, ENTITY_MANAGER_IMPL_SHORT_SIGNATURE, "processUnfetchedAttributeForSet", "(" + FETCHGROUP_TRACKER_SIGNATURE + STRING_SIGNATURE + ")V", false);
+            // jmix end
             cv_checkFetchedForSet.visitLabel(l1);
-            cv_checkFetchedForSet.visitFrame(Opcodes.F_APPEND, 1, new Object[]{"java/lang/String"}, 0, null);
+            cv_checkFetchedForSet.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
             cv_checkFetchedForSet.visitInsn(Opcodes.RETURN);
             cv_checkFetchedForSet.visitMaxs(0, 0);
         }

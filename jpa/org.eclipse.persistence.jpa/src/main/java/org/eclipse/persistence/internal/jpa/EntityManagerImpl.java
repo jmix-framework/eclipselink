@@ -131,6 +131,7 @@ import org.eclipse.persistence.queries.AttributeGroup;
 import org.eclipse.persistence.queries.Call;
 import org.eclipse.persistence.queries.DataReadQuery;
 import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.queries.FetchGroup;
 import org.eclipse.persistence.queries.FetchGroupTracker;
 import org.eclipse.persistence.queries.ObjectLevelReadQuery;
 import org.eclipse.persistence.queries.ReadAllQuery;
@@ -168,6 +169,9 @@ import org.eclipse.persistence.sessions.server.ServerSession;
  * @since TopLink Essentials - JPA 1.0
  */
 public class EntityManagerImpl implements org.eclipse.persistence.jpa.JpaEntityManager {
+
+    private static final String CANNOT_GET_UNFETCHED_PREFIX = "Cannot get unfetched";// jmix: prefix to determine exception type
+
     protected enum OperationType {FIND, REFRESH, LOCK}
 
     /** Allows transparent transactions across JTA and local transactions. */
@@ -3179,10 +3183,9 @@ public class EntityManagerImpl implements org.eclipse.persistence.jpa.JpaEntityM
      * Load/fetch the unfetched object.  This method is used by the ClassWaver..
      */
     public static void processUnfetchedAttribute(FetchGroupTracker entity, String attributeName) {
-        String errorMsg = entity._persistence_getFetchGroup().onUnfetchedAttribute(entity, attributeName);
-        if(errorMsg != null) {
-            throw new IllegalStateException(errorMsg); // jmix: changed to IllegalStateException
-        }
+        // jmix begin: choose exception type for detached unfetched attributes
+        processUnfetchedAttribute(entity, attributeName, false);
+        // jmix end
     }
 
     /**
@@ -3190,11 +3193,29 @@ public class EntityManagerImpl implements org.eclipse.persistence.jpa.JpaEntityM
      * Load/fetch the unfetched object.  This method is used by the ClassWeaver.
      */
     public static void processUnfetchedAttributeForSet(FetchGroupTracker entity, String attributeName) {
-        String errorMsg = entity._persistence_getFetchGroup().onUnfetchedAttributeForSet(entity, attributeName);
-        if(errorMsg != null) {
-            throw new IllegalStateException(errorMsg); // jmix: changed to IllegalStateException
+        // jmix begin: choose exception type for detached unfetched attributes
+        processUnfetchedAttribute(entity, attributeName, true);
+        // jmix end
+    }
+
+    // jmix begin: choose exception type for detached unfetched attributes
+    private static void processUnfetchedAttribute(FetchGroupTracker entity, String attributeName, boolean forSet) {
+        Session session = entity._persistence_getSession();
+        FetchGroup fetchGroup = entity._persistence_getFetchGroup();
+        boolean deadSession = session instanceof UnitOfWorkImpl
+                && ((UnitOfWorkImpl) session).getLifecycle() >= UnitOfWorkImpl.Death;
+
+        String errorMsg = forSet
+                ? fetchGroup.onUnfetchedAttributeForSet(entity, attributeName)
+                : fetchGroup.onUnfetchedAttribute(entity, attributeName);
+        if (errorMsg != null) {
+            if (session == null || deadSession || errorMsg.startsWith(CANNOT_GET_UNFETCHED_PREFIX)) {
+                throw new IllegalStateException(errorMsg);
+            }
+            throw new EntityNotFoundException(errorMsg);
         }
     }
+    // jmix end
 
     @Override
     public Query createQuery(CriteriaUpdate updateQuery) {
