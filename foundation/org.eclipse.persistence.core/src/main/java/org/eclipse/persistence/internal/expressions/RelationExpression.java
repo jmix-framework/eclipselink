@@ -845,6 +845,18 @@ public class RelationExpression extends CompoundExpression {
                 Object targetObject = ((ConstantExpression)second).getValue();
                 foreignKeyJoin = first.getMapping().buildObjectJoinExpression(first, targetObject, getSession());
             } else if (second.isObjectExpression() || second.isParameterExpression()) {
+                // jmix begin: the same outer-query path object-compared in two subselects produces a dangling
+                // table alias: buildObjectJoinExpression() builds a field expression on 'second', and
+                // DataExpression.getField() returns the derived field cached on the shared path, which is already
+                // normalized and aliased in the sibling subselect scope. Normalizing 'second' first returns the
+                // clone scoped to the current subselect statement (see checkJoinForSubSelectWithParent), so each
+                // subselect gets its own field expression, tables and join criteria.
+                if (second.isQueryKeyExpression()
+                        && normalizer.getStatement().isSubSelect()
+                        && normalizer.getStatement().getParentStatement().getBuilder().equals(second.getBuilder())) {
+                    second = second.normalize(normalizer);
+                }
+                // jmix end
                 foreignKeyJoin = first.getMapping().buildObjectJoinExpression(first, second, getSession());
             } else {
                 throw QueryException.invalidUseOfToManyQueryKeyInExpression(this);

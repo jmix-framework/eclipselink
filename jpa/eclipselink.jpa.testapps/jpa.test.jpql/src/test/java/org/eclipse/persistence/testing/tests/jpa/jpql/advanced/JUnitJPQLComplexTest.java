@@ -175,6 +175,10 @@ public class JUnitJPQLComplexTest extends JUnitTestCase
         tests.add("complexNotExistsTest");
         tests.add("complexExistsSubqueryJoinTest");
         tests.add("complexMultipleExistsSubqueryTest");
+        // jmix begin: dangling table alias when the same outer path is object-compared in two subqueries
+        tests.add("complexMultipleExistsSubqueryObjectComparisonTest");
+        tests.add("complexMultipleExistsSubquerySingleHopObjectComparisonTest");
+        // jmix end
         tests.add("complexInSubqueryJoinTest");
         tests.add("complexInSubqueryJoinInTest");
         tests.add("complexMemberOfTest");
@@ -1641,6 +1645,73 @@ public class JUnitJPQLComplexTest extends JUnitTestCase
         List<?> result = em.createQuery(ejbqlString).getResultList();
         Assert.assertTrue("Complex Multiple Exists SubQuery test failed", comparer.compareObjects(result, expectedResult));
     }
+
+    // jmix begin: dangling table alias when the same outer path is object-compared in two subqueries
+    public void complexMultipleExistsSubqueryObjectComparisonTest()
+    {
+        @SuppressWarnings({"unchecked"})
+        Collection<Employee> allEmps = getPersistenceUnitServerSession().readAllObjects(Employee.class);
+        List<Employee> expectedResult = new ArrayList<>();
+        for (Employee e : allEmps) {
+            Address managerAddress = (e.getManager() == null) ? null : e.getManager().getAddress();
+            boolean anyAtManagerAddress = false;
+            boolean otherAtManagerAddress = false;
+            if (managerAddress != null) {
+                for (Employee candidate : allEmps) {
+                    if ((candidate.getAddress() != null) && (candidate.getAddress().getID() == managerAddress.getID())) {
+                        anyAtManagerAddress = true;
+                        if (!candidate.getId().equals(e.getId())) {
+                            otherAtManagerAddress = true;
+                        }
+                    }
+                }
+            }
+            if (!anyAtManagerAddress || otherAtManagerAddress) {
+                expectedResult.add(e);
+            }
+        }
+
+        EntityManager em = createEntityManager();
+        String ejbqlString = "SELECT e FROM Employee e "
+                + " WHERE NOT EXISTS (SELECT e1.id FROM Employee e1 WHERE e1.address = e.manager.address) "
+                + " OR EXISTS (SELECT e2.id FROM Employee e2 WHERE e2.address = e.manager.address AND e2.id <> e.id)";
+        List<?> result = em.createQuery(ejbqlString).getResultList();
+        Assert.assertTrue("Complex Multiple Exists SubQuery with object comparison test failed",
+                comparer.compareObjects(result, expectedResult));
+    }
+
+    public void complexMultipleExistsSubquerySingleHopObjectComparisonTest()
+    {
+        @SuppressWarnings({"unchecked"})
+        Collection<Employee> allEmps = getPersistenceUnitServerSession().readAllObjects(Employee.class);
+        List<Employee> expectedResult = new ArrayList<>();
+        for (Employee e : allEmps) {
+            boolean anyWithSameManager = false;
+            boolean otherWithSameManager = false;
+            if (e.getManager() != null) {
+                for (Employee candidate : allEmps) {
+                    if ((candidate.getManager() != null) && candidate.getManager().getId().equals(e.getManager().getId())) {
+                        anyWithSameManager = true;
+                        if (!candidate.getId().equals(e.getId())) {
+                            otherWithSameManager = true;
+                        }
+                    }
+                }
+            }
+            if (!anyWithSameManager || otherWithSameManager) {
+                expectedResult.add(e);
+            }
+        }
+
+        EntityManager em = createEntityManager();
+        String ejbqlString = "SELECT e FROM Employee e "
+                + " WHERE NOT EXISTS (SELECT e1.id FROM Employee e1 WHERE e1.manager = e.manager) "
+                + " OR EXISTS (SELECT e2.id FROM Employee e2 WHERE e2.manager = e.manager AND e2.id <> e.id)";
+        List<?> result = em.createQuery(ejbqlString).getResultList();
+        Assert.assertTrue("Complex Multiple Exists SubQuery with single-hop object comparison test failed",
+                comparer.compareObjects(result, expectedResult));
+    }
+    // jmix end
 
     public void complexExistsSubqueryJoinTest()
     {

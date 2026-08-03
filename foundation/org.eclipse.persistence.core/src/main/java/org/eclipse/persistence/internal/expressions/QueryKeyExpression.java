@@ -755,6 +755,37 @@ public class QueryKeyExpression extends ObjectExpression {
                     return clonedExpression;
                 }
             }
+            // jmix begin: same protection for a single-hop to-one path rooted directly at the parent
+            // statement's builder (e.g. 'sub.ref = e.ref' in two subselects). Without cloning, the original
+            // is normalized and aliased in the scope of the first subselect that uses it, and the next
+            // subselect reuses the sibling's table alias, producing invalid SQL.
+            else if (baseExpression.isExpressionBuilder()) {
+                DatabaseMapping mapping = getMapping();
+                if (mapping != null && mapping.isOneToOneMapping()) {
+                    if (statement.getOptimizedClonedExpressions().containsKey(this)) {
+                        return statement.getOptimizedClonedExpressions().get(this);
+                    }
+
+                    // Clone expression, normalize & return.
+                    QueryKeyExpression clonedExpression = new QueryKeyExpression(name, baseExpression);
+                    clonedExpression.shouldQueryToManyRelationship = this.shouldQueryToManyRelationship;
+                    clonedExpression.shouldUseOuterJoin = this.shouldUseOuterJoin;
+                    clonedExpression.hasQueryKey = this.hasQueryKey;
+                    clonedExpression.hasMapping = this.hasMapping;
+                    clonedExpression.isAttributeExpression = this.isAttributeExpression;
+                    clonedExpression.isClonedForSubQuery = true;
+
+                    if (base == this) {
+                        clonedExpression = (QueryKeyExpression) clonedExpression.normalize(normalizer, clonedExpression, foreignKeyJoinPointer);
+                    } else {
+                        // Caller invoked overloaded method with different base, RelationExpression in this case.
+                        clonedExpression = (QueryKeyExpression) clonedExpression.normalize(normalizer, base, foreignKeyJoinPointer);
+                    }
+                    statement.addOptimizedClonedExpressions(this, clonedExpression);
+                    return clonedExpression;
+                }
+            }
+            // jmix end
         }
 
         return null;
