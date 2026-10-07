@@ -22,7 +22,7 @@
     <name>EclipseLink Core</name>
     <artifactId>org.eclipse.persistence.core</artifactId>
     <packaging>jar</packaging>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.0.2</version>
 
     <parent>
         <groupId>org.eclipse.persistence</groupId>
