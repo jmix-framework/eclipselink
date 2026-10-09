@@ -587,6 +587,10 @@ public class MongoDatabaseTest extends JUnitTestCase {
             order = em.find(Order.class, order.id);
             order.orderedBy = "Fred Jones";
             order.address.addressee = "Fred Jones";
+            // jmix begin: access lazy collections before closing EntityManager
+            order.customers.size();
+            order.buyers.size();
+            // jmix end
             commitTransaction(em);
         } finally {
             closeEntityManagerAndTransaction(em);
@@ -621,6 +625,9 @@ public class MongoDatabaseTest extends JUnitTestCase {
             em.persist(customer);
             order.customers.add(customer);
             order.comments.add("foo");
+            // jmix begin: access lazy collections before closing EntityManager
+            order.buyers.size();
+            // jmix end
             commitTransaction(em);
         } finally {
             closeEntityManagerAndTransaction(em);
@@ -652,6 +659,10 @@ public class MongoDatabaseTest extends JUnitTestCase {
             order = em.find(Order.class, order.id);
             order.orderedBy = "Fred Jones";
             order.address.addressee = "Fred Jones";
+            // jmix begin: access lazy collections before closing EntityManager
+            order.customers.size();
+            order.buyers.size();
+            // jmix end
         } finally {
             closeEntityManagerAndTransaction(em);
         }
