@@ -1,5 +1,8 @@
 package org.eclipse.persistence.internal.helper;
 
+import org.eclipse.persistence.internal.databaseaccess.DatabasePlatform;
+import org.eclipse.persistence.internal.sessions.AbstractSession;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,6 +78,19 @@ public class JmixUtil {
 
     public static void clearProperties() {
         propertiesTL.remove();
+    }
+
+    /**
+     * Returns {@link DatabasePlatform#shouldPrintInheritanceTableJoinsInFromClause()} of the session platform.
+     * <p>
+     * The flag exists only on relational platforms. {@code AbstractSession#getPlatform()} casts the platform
+     * to {@link DatabasePlatform} and throws {@link ClassCastException} for non-relational datasources
+     * (EIS/NoSQL), so the platform is obtained through {@code getDatasourcePlatform()} and the flag
+     * is treated as {@code false} for any other platform type.
+     */
+    public static boolean shouldPrintInheritanceTableJoinsInFromClause(AbstractSession session) {
+        return session.getDatasourcePlatform() instanceof DatabasePlatform platform
+                && platform.shouldPrintInheritanceTableJoinsInFromClause();
     }
 
     private static void checkProperties() {

@@ -55,6 +55,7 @@ import org.eclipse.persistence.internal.expressions.SQLUpdateStatement;
 import org.eclipse.persistence.internal.helper.DatabaseField;
 import org.eclipse.persistence.internal.helper.DatabaseTable;
 import org.eclipse.persistence.internal.helper.InvalidObject;
+import org.eclipse.persistence.internal.helper.JmixUtil;
 import org.eclipse.persistence.internal.helper.NonSynchronizedVector;
 import org.eclipse.persistence.internal.identitymaps.CacheKey;
 import org.eclipse.persistence.internal.sessions.AbstractRecord;
@@ -205,7 +206,7 @@ public class ExpressionQueryMechanism extends StatementQueryMechanism {
             Expression additionalJoin;
             if (shouldUseAdditionalJoinExpression) {
                 // jmix begin
-                if (getSession().getPlatform().shouldPrintInheritanceTableJoinsInFromClause()) {
+                if (JmixUtil.shouldPrintInheritanceTableJoinsInFromClause(getSession())) {
                     additionalJoin = queryManager.getAdditionalJoinExpressionWithoutMultiTableJoins();
                 } else {
                     additionalJoin = queryManager.getAdditionalJoinExpression();
@@ -804,7 +805,7 @@ public class ExpressionQueryMechanism extends StatementQueryMechanism {
         selectStatement = new SQLSelectStatement();
         selectStatement.addField(field);
         // jmix begin
-        if (getSession().getPlatform().shouldPrintInheritanceTableJoinsInFromClause()) {
+        if (JmixUtil.shouldPrintInheritanceTableJoinsInFromClause(getSession())) {
             addInheritanceTablesJoinsInFromClause(selectStatement);
         }
         // jmix end

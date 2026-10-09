@@ -22,6 +22,7 @@ import org.eclipse.persistence.internal.expressions.ExpressionNormalizer;
 import org.eclipse.persistence.internal.expressions.ObjectExpression;
 import org.eclipse.persistence.internal.expressions.SQLSelectStatement;
 import org.eclipse.persistence.internal.helper.DatabaseTable;
+import org.eclipse.persistence.internal.helper.JmixUtil;
 import org.eclipse.persistence.internal.sessions.AbstractRecord;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.queries.DatabaseQuery;
@@ -304,7 +305,7 @@ public class ExpressionBuilder extends ObjectExpression {
             }
             if (!this.wasAdditionJoinCriteriaUsed) {
                 // jmix begin
-                if (getSession().getPlatform().shouldPrintInheritanceTableJoinsInFromClause() &&
+                if (JmixUtil.shouldPrintInheritanceTableJoinsInFromClause(getSession()) &&
                         addInheritanceTablesJoinsInFromClause(getDescriptor(), normalizer)) {
                     criteria = getDescriptor().getQueryManager().getAdditionalJoinExpressionWithoutMultiTableJoins();
                 } else {
