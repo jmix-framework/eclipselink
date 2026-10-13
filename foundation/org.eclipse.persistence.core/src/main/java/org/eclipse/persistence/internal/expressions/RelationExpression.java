@@ -543,7 +543,12 @@ public class RelationExpression extends CompoundExpression {
                 && (((QueryKeyExpression)first).getBaseExpression() != null)
                 && ((QueryKeyExpression)first).getBaseExpression().isQueryKeyExpression()) {
             // Do not optimize for subselect if it is using parent builder, and needs to clone.
-            if(normalizer.getStatement().isSubSelect() && normalizer.getStatement().getParentStatement().getBuilder().equals(first.getBuilder())) {
+            // jmix begin: check builders of all enclosing queries, not only the immediate parent's;
+            // the optimization builds a field expression on the shared base (cached in its derived
+            // fields), which leaks another subselect's table aliases for deeper nesting (jmix#5121)
+            //if(normalizer.getStatement().isSubSelect() && normalizer.getStatement().getParentStatement().getBuilder().equals(first.getBuilder())) {
+            if (isPathRootedAtEnclosingBuilder(first, normalizer)) {
+            // jmix end
                 return null;
             }
             QueryKeyExpression mappingExpression = (QueryKeyExpression)((QueryKeyExpression)first).getBaseExpression();
@@ -570,6 +575,32 @@ public class RelationExpression extends CompoundExpression {
         }
         return null;
     }
+
+    // jmix begin: shared outer-path handling for subselects (jmix#5121)
+    /**
+     * Returns whether the expression is a query key path rooted at the builder of an enclosing
+     * (parent, grandparent, ...) query of the current subselect statement. Such a shared path must be
+     * normalized into a per-statement clone (see QueryKeyExpression.checkJoinForSubSelectWithParent)
+     * before field expressions are built on it: the derived fields are cached on the shared original
+     * and leak the table aliases of whichever subselect normalized them first.
+     */
+    private static boolean isPathRootedAtEnclosingBuilder(Expression expression, ExpressionNormalizer normalizer) {
+        if (!expression.isQueryKeyExpression()) {
+            return false;
+        }
+        SQLSelectStatement statement = normalizer.getStatement();
+        if (!statement.isSubSelect()) {
+            return false;
+        }
+        Expression queryBuilder = expression.getBuilder();
+        for (SQLSelectStatement enclosing = statement.getParentStatement(); enclosing != null; enclosing = enclosing.getParentStatement()) {
+            if ((enclosing.getBuilder() != null) && enclosing.getBuilder().equals(queryBuilder)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    // jmix end
 
     /**
      * INTERNAL:
@@ -834,6 +865,25 @@ public class RelationExpression extends CompoundExpression {
             // attempt the optimization for these.
             (!first.isExpressionBuilder() && !((QueryKeyExpression)first).shouldQueryToManyRelationship() &&
              (first.getMapping() != null)) {
+            // jmix begin: if the object side is a shared outer path, build the join on a detached copy
+            // whose base is the clone scoped to the current subselect statement. Mutating the shared
+            // expression's base below would leak this statement's table aliases into the other subselects
+            // that compare the same path.
+            if (isPathRootedAtEnclosingBuilder(first, normalizer) && (first.getBaseExpression() != null)) {
+                Expression normalizedBase = first.getBaseExpression().normalize(normalizer);
+                if (normalizedBase != first.getBaseExpression()) {
+                    QueryKeyExpression originalFirst = (QueryKeyExpression) first;
+                    QueryKeyExpression clonedFirst = new QueryKeyExpression(originalFirst.getName(), normalizedBase);
+                    clonedFirst.shouldQueryToManyRelationship = originalFirst.shouldQueryToManyRelationship;
+                    clonedFirst.shouldUseOuterJoin = originalFirst.shouldUseOuterJoin;
+                    clonedFirst.hasQueryKey = originalFirst.hasQueryKey;
+                    clonedFirst.hasMapping = originalFirst.hasMapping;
+                    clonedFirst.isAttributeExpression = originalFirst.isAttributeExpression;
+                    clonedFirst.isClonedForSubQuery = true;
+                    first = clonedFirst;
+                }
+            }
+            // jmix end
             // Normalize firstChild's base only, as firstChild will be optimized out.
             if (first.getBaseExpression() != null) {
                 first.setBaseExpression(first.getBaseExpression().normalize(normalizer));
@@ -849,9 +899,7 @@ public class RelationExpression extends CompoundExpression {
                 // normalized and aliased in the sibling subselect scope. Normalizing 'second' first returns the
                 // clone scoped to the current subselect statement (see checkJoinForSubSelectWithParent), so each
                 // subselect gets its own field expression, tables and join criteria.
-                if (second.isQueryKeyExpression()
-                        && normalizer.getStatement().isSubSelect()
-                        && normalizer.getStatement().getParentStatement().getBuilder().equals(second.getBuilder())) {
+                if (isPathRootedAtEnclosingBuilder(second, normalizer)) {
                     second = second.normalize(normalizer);
                 }
                 // jmix end
@@ -878,6 +926,13 @@ public class RelationExpression extends CompoundExpression {
                 // Each expression will represent a separate table, so compare the primary
                 // keys of the first and second expressions.
             } else if (second.isObjectExpression() || second.isParameterExpression()) {
+                // jmix begin: swap a shared outer path for its per-statement clone before the twist
+                // builds field expressions on it, otherwise the fields are cached on the shared original
+                // and reused by the other subselects with this statement's table aliases.
+                if (isPathRootedAtEnclosingBuilder(second, normalizer)) {
+                    second = second.normalize(normalizer);
+                }
+                // jmix end
                 foreignKeyJoin =
                         first.twist(first.getDescriptor().getObjectBuilder().getPrimaryKeyExpression(), second);
             } else {

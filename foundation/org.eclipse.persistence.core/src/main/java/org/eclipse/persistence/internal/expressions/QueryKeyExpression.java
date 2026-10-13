@@ -718,7 +718,23 @@ public class QueryKeyExpression extends ObjectExpression {
      */
     protected Expression checkJoinForSubSelectWithParent(ExpressionNormalizer normalizer, Expression base, List<Expression> foreignKeyJoinPointer) {
         SQLSelectStatement statement = normalizer.getStatement();
-        if(!isClonedForSubQuery && statement.isSubSelect() && statement.getParentStatement().getBuilder().equals(getBuilder())) {
+        // jmix begin: clone also for a path rooted at the builder of ANY enclosing query, not only the
+        // immediate parent's. A second-level subselect normalizing the shared original otherwise emits
+        // join criteria through derived fields that are cached on the original and already rebased and
+        // aliased in an outer subselect's scope, producing an uncorrelated join (jmix#5121).
+        //if(!isClonedForSubQuery && statement.isSubSelect() && statement.getParentStatement().getBuilder().equals(getBuilder())) {
+        boolean rootedAtEnclosingBuilder = false;
+        if (!isClonedForSubQuery && statement.isSubSelect()) {
+            Expression queryBuilder = getBuilder();
+            for (SQLSelectStatement enclosing = statement.getParentStatement(); enclosing != null; enclosing = enclosing.getParentStatement()) {
+                if ((enclosing.getBuilder() != null) && enclosing.getBuilder().equals(queryBuilder)) {
+                    rootedAtEnclosingBuilder = true;
+                    break;
+                }
+            }
+        }
+        if (rootedAtEnclosingBuilder) {
+        // jmix end
             if (baseExpression.isQueryKeyExpression()) {
                 QueryKeyExpression baseQueryKeyExpression = (QueryKeyExpression) baseExpression;
                 DatabaseMapping mapping = baseQueryKeyExpression.getMapping();
@@ -774,8 +790,8 @@ public class QueryKeyExpression extends ObjectExpression {
                     return clonedExpression;
                 }
             }
-            // jmix begin: same protection for a single-hop to-one path rooted directly at the parent
-            // statement's builder (e.g. 'sub.ref = e.ref' in two subselects). Without cloning, the original
+            // jmix begin: same protection for a single-hop to-one path rooted directly at an enclosing
+            // query's builder (e.g. 'sub.ref = e.ref' in two subselects). Without cloning, the original
             // is normalized and aliased in the scope of the first subselect that uses it, and the next
             // subselect reuses the sibling's table alias, producing invalid SQL.
             else if (baseExpression.isExpressionBuilder()) {
